@@ -1,5 +1,6 @@
 /**
  * NaviOS Import Core Logic
+ * Version 1.0.1
  */
 
 // --- UI Control Functions ---
@@ -12,10 +13,34 @@ function closeModals() {
     modals.forEach(modal => modal.style.display = 'none');
 }
 
+// --- App Update Logic (Cache Busting) ---
+function updateApp() {
+    const btn = document.querySelector('#settingsModal .modal-btn');
+    if (btn) btn.innerText = 'Downloading Update...';
+    
+    if ('serviceWorker' in navigator) {
+        // Clear all cached files to force fresh Vercel pull
+        caches.keys().then((names) => {
+            for (let name of names) caches.delete(name);
+        });
+        
+        // Unregister current worker and reload page
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+            for (let registration of registrations) {
+                registration.unregister();
+            }
+            window.location.reload(true);
+        });
+    } else {
+        window.location.reload(true);
+    }
+}
+
 // --- Dynamic Service Worker Registration ---
 const swScript = `
+const CACHE_NAME = 'navios-core-v1.0.1';
 self.addEventListener('install', (event) => {
-    event.waitUntil(caches.open('navios-core-v1').then((cache) => {
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => {
         return cache.addAll(['./index.html', './manifest.json', './app.js']);
     }));
 });
@@ -28,31 +53,21 @@ const workerUrl = URL.createObjectURL(workerBlob);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register(workerUrl);
 
 // --- PDF Worker Synchronization ---
-window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/
+window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
 // --- Download & Storage Tracking ---
-function triggerDownload(url, filename, statusElementId = null) {
+function triggerDownload(url, filename) {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    
     // Categorize and track the download for local app storage
     if (filename.includes('.mp4')) incrementStorage('videos');
     else if (filename.includes('.png') || filename.includes('.jpg') || filename.includes('.pdf')) incrementStorage('images');
     else if (filename.includes('.wav') || filename.includes('.mp3')) incrementStorage('audio');
-
-    if (statusElementId) {
-        // Fix for iOS PWA freezing: Generate a physical button instead of an automatic hidden click
-        const statusEl = document.getElementById(statusElementId);
-        if (statusEl) {
-            statusEl.style.display = 'block';
-            statusEl.innerHTML = `<a href="${url}" download="${filename}" style="display:block; background:var(--accent); color:white; padding:14px; border-radius:10px; text-decoration:none; margin-top:15px; font-weight:600; text-align:center;">Tap to Save File</a>
-            <p style="font-size:0.75rem; color:#888; margin-top:8px; text-align:center;">(If it opens on screen, long-press the file to save it to Photos/Files)</p>`;
-        }
-    } else {
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.download = filename;
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-    }
 }
 
 function incrementStorage(type) {
@@ -68,12 +83,13 @@ function updateStorageUI() {
     
     const cards = document.querySelectorAll('.storage-card');
     if (cards.length >= 4) {
-        cards[1].querySelector('p').innerText = `${videoCount} items`; 
-        cards[2].querySelector('p').innerText = `${audioCount} items`; 
-        cards[3].querySelector('p').innerText = `${imgCount} items`;   
+        cards[1].querySelector('p').innerText = `${videoCount} items`; // Videos
+        cards[2].querySelector('p').innerText = `${audioCount} items`; // Songs
+        cards[3].querySelector('p').innerText = `${imgCount} items`;   // Images
     }
 }
 
+// Populate storage numbers on app launch
 document.addEventListener('DOMContentLoaded', updateStorageUI);
 
 // --- Keyless Media Extraction (Cobalt Proxy) ---
@@ -86,9 +102,10 @@ async function extractMedia() {
     
     if (status) {
         status.style.display = 'block';
-        status.innerHTML = 'Connecting to proxy...';
+        status.innerText = 'Connecting to proxy...';
     }
 
+    // Configured for latest API version
     const requestPayload = {
         url: url,
         videoQuality: "max",
@@ -106,27 +123,25 @@ async function extractMedia() {
 
         const payload = await response.json();
         
+        // Handle Turnstile/CAPTCHA API errors gracefully
         if (payload.error && payload.error.code === 'error.api.auth.turnstile.missing') {
             alert('The public API blocked the request due to Bot Protection. You must host your own API instance to bypass this.');
-            if (status) status.style.display = 'none';
             return;
         }
 
-        if (!response.ok) throw new Error(`HTTP Error`);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
         if (payload.status === 'redirect' || payload.status === 'stream') {
             window.open(payload.url, '_blank'); 
-            if (status) status.style.display = 'none';
-            closeModals();
         } else if (payload.url) {
-            triggerDownload(payload.url, `media_${Date.now()}`, 'extStatus');
+            triggerDownload(payload.url, `media_${Date.now()}`);
         } else {
-            alert('Proxy encountered an error.');
-            if (status) status.style.display = 'none';
+            alert('Proxy encountered an error: ' + (payload.text || 'Unknown'));
         }
     } catch (error) {
         console.error('Extraction Exception:', error);
         alert('Extraction failed. The proxy may be rate-limiting requests.');
+    } finally {
         if (status) status.style.display = 'none';
     }
 }
@@ -139,10 +154,7 @@ async function transformDocument() {
 
     if (!fileInput.files.length) return alert('Target file required for transformation.');
     const file = fileInput.files[0];
-    if (status) {
-        status.style.display = 'block';
-        status.innerHTML = 'Processing...';
-    }
+    if (status) status.style.display = 'block';
 
     try {
         if (mode === 'imgToPdf') await rasterToVector(file);
@@ -150,7 +162,9 @@ async function transformDocument() {
     } catch (error) {
         console.error('Transformation Exception:', error);
         alert('Binary transformation failed.');
+    } finally {
         if (status) status.style.display = 'none';
+        closeModals();
     }
 }
 
@@ -167,7 +181,7 @@ function rasterToVector(file) {
                     format: [img.width, img.height]
                 });
                 doc.addImage(img, 'PNG', 0, 0, img.width, img.height);
-                triggerDownload(doc.output('bloburl'), `packaged_${Date.now()}.pdf`, 'docStatus');
+                triggerDownload(doc.output('bloburl'), `packaged_${Date.now()}.pdf`);
                 resolve();
             };
             img.onerror = reject;
@@ -192,7 +206,7 @@ async function vectorToRaster(file) {
             canvas.width = viewport.width;
             
             await page.render({canvasContext: context, viewport: viewport}).promise;
-            triggerDownload(canvas.toDataURL('image/png'), `rasterized_${Date.now()}.png`, 'docStatus');
+            triggerDownload(canvas.toDataURL('image/png'), `rasterized_${Date.now()}.png`);
             resolve();
         };
         reader.readAsArrayBuffer(file);
@@ -206,10 +220,7 @@ function enhanceVisuals() {
     
     if (!fileInput.files.length) return alert('Visual asset required.');
     const file = fileInput.files[0];
-    if (status) {
-        status.style.display = 'block';
-        status.innerHTML = 'Applying filters...';
-    }
+    if (status) status.style.display = 'block';
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -223,7 +234,9 @@ function enhanceVisuals() {
             ctx.filter = 'contrast(1.18) brightness(1.08) saturate(1.25)';
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             
-            triggerDownload(canvas.toDataURL('image/jpeg', 0.98), `enhanced_${Date.now()}.jpg`, 'visStatus');
+            triggerDownload(canvas.toDataURL('image/jpeg', 0.98), `enhanced_${Date.now()}.jpg`);
+            if (status) status.style.display = 'none';
+            closeModals();
         };
         img.src = e.target.result;
     };
@@ -240,7 +253,7 @@ function processVideo() {
     
     if (status) {
         status.style.display = 'block';
-        status.innerHTML = 'Initializing processing engine...';
+        status.innerText = 'Initializing processing engine...';
     }
     
     const file = fileInput.files[0];
@@ -250,7 +263,7 @@ function processVideo() {
     video.playsInline = true;
 
     video.onloadeddata = () => {
-        if (status) status.innerHTML = 'Processing frames... Do not close app.';
+        if (status) status.innerText = 'Processing frames... Do not close app.';
         
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -270,8 +283,11 @@ function processVideo() {
         };
         
         recorder.onstop = () => {
+            if (status) status.innerText = 'Packaging file...';
             const blob = new Blob(chunks, { type: options.mimeType });
-            triggerDownload(URL.createObjectURL(blob), `edited_vid_${Date.now()}.mp4`, 'vidStatus');
+            triggerDownload(URL.createObjectURL(blob), `edited_vid_${Date.now()}.mp4`);
+            if (status) status.style.display = 'none';
+            closeModals();
         };
         
         recorder.start();
