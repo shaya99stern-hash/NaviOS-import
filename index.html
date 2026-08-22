@@ -3,122 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>PWA Media Engine</title>
+    <title>NaviOS Import</title>
 
-    <!-- iOS PWA Standalone Declarations -->
+    <!-- iOS Native App Declarations -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MediaEngine">
-    
-    <!-- PWA Manifest & Opaque iOS Icons -->
-    <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 
-    <!-- Immutable External Libraries -->
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <style>
         :root {
             --bg: #000000;
-            --surface: #1c1c1e;
-            --primary: #0A84FF;
-            --text: #ffffff;
-            --border: #38383a;
+            --surface: #141415;
+            --surface-light: #1C1C1E;
+            --accent: #E5734A;
+            --accent-bg: rgba(229, 115, 74, 0.1);
+            --text: #FFFFFF;
+            --text-muted: #8E8E93;
         }
-        
+
         body {
             background-color: var(--bg);
             color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
             margin: 0;
-            padding: 20px;
-            padding-top: calc(env(safe-area-inset-top) + 20px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            /* Pad for the notch at the top and the nav bar at the bottom */
+            padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 100px) 20px;
         }
 
-        .module {
-            width: 100%;
-            max-width: 500px;
+        /* --- Header --- */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .logo-area { display: flex; align-items: center; gap: 12px; font-size: 1.2rem; font-weight: 500; }
+        .logo-icon { color: var(--accent); font-size: 2rem; }
+        .settings-btn { background: var(--surface-light); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+        .greeting h1 { margin: 0; font-size: 1.8rem; font-weight: 500; }
+        .greeting p { color: var(--text-muted); margin-top: 5px; font-size: 0.95rem; margin-bottom: 30px; }
+
+        .section-title { color: var(--text-muted); font-size: 1rem; margin-bottom: 12px; font-weight: 500; }
+
+        /* --- Tools Grid --- */
+        .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
+        .tool-card {
             background-color: var(--surface);
-            padding: 24px;
             border-radius: 16px;
-            border: 1px solid var(--border);
-            margin-bottom: 24px;
-            box-sizing: border-box;
-        }
-
-        h2 { 
-            margin-top: 0; 
-            font-size: 1.1rem; 
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--border); 
-            padding-bottom: 12px; 
-            margin-bottom: 16px;
-        }
-        
-        input, select, button {
-            width: 100%;
-            padding: 14px;
-            margin: 8px 0 16px 0;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            box-sizing: border-box;
-            font-size: 1rem;
-            -webkit-appearance: none;
-        }
-
-        input, select { background-color: #2c2c2e; color: white; }
-        
-        button {
-            background-color: var(--primary);
-            color: white;
-            font-weight: 600;
-            border: none;
+            padding: 16px;
+            position: relative;
             cursor: pointer;
-            transition: opacity 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
         }
+        .tool-card:active { opacity: 0.7; }
+        .tool-icon { background: var(--accent-bg); color: var(--accent); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 12px; }
+        .tool-info h3 { margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 500; }
+        .tool-info p { margin: 0; font-size: 0.75rem; color: var(--text-muted); line-height: 1.3; padding-right: 15px; }
+        .chevron { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #555; }
 
-        button:active { opacity: 0.7; }
-        .status { display: none; text-align: center; color: #32d74b; font-size: 0.9rem; font-weight: 500; }
+        .full-width-card { grid-column: span 2; display: flex; align-items: center; padding: 16px; background-color: var(--surface); border-radius: 16px; }
+        .full-width-card .tool-icon { margin-bottom: 0; margin-right: 16px; }
+        .full-width-card .chevron { right: 16px; }
+
+        /* --- Storage Grid --- */
+        .storage-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 30px; }
+        .storage-card { background-color: var(--surface); border-radius: 14px; padding: 12px 10px; text-align: left; position: relative; }
+        .storage-card .tool-icon { width: 30px; height: 30px; font-size: 1.2rem; margin-bottom: 8px; }
+        .storage-card h3 { margin: 0; font-size: 0.8rem; font-weight: 500; }
+        .storage-card p { margin: 0; font-size: 0.7rem; color: var(--text-muted); }
+        .storage-card .chevron { right: 10px; font-size: 0.8rem; }
+
+        /* --- Quick Actions --- */
+        .quick-actions { display: flex; justify-content: space-between; background-color: var(--surface); border-radius: 16px; padding: 16px; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.75rem; border: none; background: none; cursor: pointer; }
+        .action-btn i { color: var(--accent); font-size: 1.5rem; }
+
+        /* --- Bottom Nav --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background-color: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-around; padding: 16px 0 calc(env(safe-area-inset-bottom) + 10px) 0;
+            border-top: 1px solid rgba(255,255,255,0.05); z-index: 100;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); gap: 4px; font-size: 0.7rem; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item i { font-size: 1.5rem; }
+
+        /* --- Action Modal (Hidden by default) --- */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 200;
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: var(--surface-light); width: 90%; max-width: 400px; padding: 24px;
+            border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .modal-content input, .modal-content select {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none;
+            background: #2A2A2C; color: white; box-sizing: border-box;
+        }
+        .modal-btn { background: var(--accent); color: white; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: 600; margin-top: 10px; cursor: pointer; }
+        .close-btn { margin-top: 15px; background: transparent; border: 1px solid #555; color: white; padding: 10px; border-radius: 10px; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="module">
-        <h2>🌐 Media Extractor (HD Video & Audio)</h2>
-        <input type="url" id="targetUrl" placeholder="Paste media link (e.g., YouTube)">
-        <select id="mediaMode">
-            <option value="video">HD Video (Max Resolution)</option>
-            <option value="audio">Enhanced HD Audio (WAV/MP3)</option>
-        </select>
-        <button onclick="extractMedia()">Download Media</button>
-        <div id="extStatus" class="status">Connecting to proxy infrastructure...</div>
+    <div class="header">
+        <div class="logo-area">
+            <i class="ph ph-asterisk logo-icon"></i>
+            NaviOS Import
+        </div>
+        <div class="settings-btn"><i class="ph ph-gear"></i></div>
     </div>
 
-    <div class="module">
-        <h2>📄 Document Transformation Engine</h2>
-        <input type="file" id="docFile" accept="image/png, image/jpeg, application/pdf">
-        <select id="docMode">
-            <option value="imgToPdf">Package Image into PDF</option>
-            <option value="pdfToImg">Rasterize PDF to HD Image</option>
-        </select>
-        <button onclick="transformDocument()">Execute Transformation</button>
-        <div id="docStatus" class="status">Processing binary arrays...</div>
+    <div class="greeting">
+        <h1>Good afternoon, Shaya</h1>
+        <p>What would you like to do today?</p>
     </div>
 
-    <div class="module">
-        <h2>✨ Visual Enhancement Core</h2>
-        <input type="file" id="visualFile" accept="image/png, image/jpeg">
-        <button onclick="enhanceVisuals()">Apply Algorithmic Filters</button>
-        <div id="visStatus" class="status">Applying convolution matrices...</div>
+    <div class="section-title">Tools</div>
+    <div class="tools-grid">
+        <div class="tool-card" onclick="openModal('downloadModal')">
+            <div class="tool-icon"><i class="ph ph-download-simple"></i></div>
+            <div class="tool-info">
+                <h3>Download Media</h3>
+                <p>Download any link as video or audio</p>
+            </div>
+            <i class="ph ph-caret-right chevron"></i>
+        </div>
+        
+        <div class="tool-card" onclick="alert('Video editing requires advanced WebAssembly processing. Use Download Media for max-quality extraction.')">
+            <div class="tool-icon"><i class="ph ph-film-strip"></i></div>
+            <div class="tool-info">
+                <h3>Video Tools</h3>
+                <p>Enhance, convert and edit videos</p>
+            </div>
+            <i class="ph ph-caret-right chevron"></i>
+        </div>
+
+        <div class="tool-card" onclick="openModal('downloadModal')">
+            <div class="tool-icon"><i class="ph ph-music-note"></i></div>
+            <div class="tool-info">
+                <h3>Audio Tools</h3>
+                <p>Convert, enhance and edit audio</p>
+            </div>
+            <i class="ph ph-caret-right chevron"></i>
+        </div>
+
+        <div class="tool-card" onclick="openModal('enhanceModal')">
+            <div class="tool-icon"><i class="ph ph-image"></i></div>
+            <div class="tool-info">
+                <h3>Image Tools</h3>
+                <p>Convert, enhance and edit images</p>
+            </div>
+            <i class="ph ph-caret-right chevron"></i>
+        </div>
+
+        <div class="tool-card" onclick="openModal('documentModal')">
+            <div class="tool-icon"><i class="ph ph-file-text"></i></div>
+            <div class="tool-info">
+                <h3>Document Tools</h3>
+                <p>Convert documents to any format</p>
+            </div>
+            <i class="ph ph-caret-right chevron"></i>
+        </div>
+
+        <div class="tool-card" onclick="openModal('enhanceModal')">
+            <div class="tool-icon"><i class="ph ph-sparkle"></i></div>
+            <div class="tool-info">
+                <h3>Enhance Media</h3>
+                <p>Enhance quality of images</p>
+            </div>
+            <i class="ph ph-caret-right chevron"></i>
+        </div>
+
+        <div class="full-width-card" onclick="alert('More tools coming soon!')">
+            <div class="tool-icon"><i class="ph ph-cube"></i></div>
+            <div class="tool-info">
+                <h3>More Tools</h3>
+                <p>Compress, merge, extract and more</p>
+            </div>
+            <i class="ph ph-caret-right chevron"></i>
+        </div>
     </div>
 
-    <!-- Core Logic Injection -->
+    <div class="section-title">Storage</div>
+    <div class="storage-grid">
+        <div class="storage-card">
+            <div class="tool-icon"><i class="ph ph-film-strip"></i></div>
+            <h3>Movies</h3><p>0 items</p><i class="ph ph-caret-right chevron"></i>
+        </div>
+        <div class="storage-card">
+            <div class="tool-icon"><i class="ph ph-youtube-logo"></i></div>
+            <h3>Videos</h3><p>0 items</p><i class="ph ph-caret-right chevron"></i>
+        </div>
+        <div class="storage-card">
+            <div class="tool-icon"><i class="ph ph-music-notes"></i></div>
+            <h3>Songs</h3><p>0 items</p><i class="ph ph-caret-right chevron"></i>
+        </div>
+        <div class="storage-card">
+            <div class="tool-icon"><i class="ph ph-image"></i></div>
+            <h3>Images</h3><p>0 items</p><i class="ph ph-caret-right chevron"></i>
+        </div>
+    </div>
+
+    <div class="section-title">Quick Actions</div>
+    <div class="quick-actions">
+        <button class="action-btn" onclick="openModal('downloadModal')"><i class="ph ph-link"></i> Paste Link</button>
+        <button class="action-btn" onclick="openModal('documentModal')"><i class="ph ph-upload-simple"></i> Import File</button>
+        <button class="action-btn"><i class="ph ph-folder-plus"></i> New Folder</button>
+        <button class="action-btn"><i class="ph ph-magnifying-glass"></i> Search</button>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active"><i class="ph-fill ph-house"></i> Home</div>
+        <div class="nav-item"><i class="ph ph-folder"></i> Storage</div>
+        <div class="nav-item"><i class="ph ph-user"></i> Profile</div>
+    </div>
+
+    <!-- Modals (Popups for actual functionality) -->
+    <div class="modal" id="downloadModal">
+        <div class="modal-content">
+            <h3>Download Link</h3>
+            <input type="url" id="targetUrl" placeholder="Paste YouTube/Media link">
+            <select id="mediaMode">
+                <option value="video">HD Video (Max Resolution)</option>
+                <option value="audio">Enhanced HD Audio (WAV)</option>
+            </select>
+            <button class="modal-btn" onclick="extractMedia()">Download</button>
+            <button class="close-btn" onclick="closeModals()">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal" id="documentModal">
+        <div class="modal-content">
+            <h3>Document Engine</h3>
+            <input type="file" id="docFile" accept="image/png, image/jpeg, application/pdf">
+            <select id="docMode">
+                <option value="imgToPdf">Convert Image to PDF</option>
+                <option value="pdfToImg">Convert PDF to HD Image</option>
+            </select>
+            <button class="modal-btn" onclick="transformDocument()">Transform</button>
+            <button class="close-btn" onclick="closeModals()">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal" id="enhanceModal">
+        <div class="modal-content">
+            <h3>Enhance Image</h3>
+            <input type="file" id="visualFile" accept="image/png, image/jpeg">
+            <button class="modal-btn" onclick="enhanceVisuals()">Enhance Quality</button>
+            <button class="close-btn" onclick="closeModals()">Cancel</button>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
