@@ -39,7 +39,7 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .logo-area { display: flex; align-items: center; gap: 12px; font-size: 1.2rem; font-weight: 500; }
         .logo-icon { color: var(--accent); font-size: 2rem; }
-        .settings-btn { background: var(--surface-light); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .settings-btn { background: var(--surface-light); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
 
         .greeting h1 { margin: 0; font-size: 1.8rem; font-weight: 500; }
         .greeting p { color: var(--text-muted); margin-top: 5px; font-size: 0.95rem; margin-bottom: 30px; }
@@ -115,7 +115,8 @@
             <i class="ph ph-asterisk logo-icon"></i>
             NaviOS Import
         </div>
-        <div class="settings-btn"><i class="ph ph-gear"></i></div>
+        <!-- Settings button now triggers the settings modal -->
+        <div class="settings-btn" onclick="openModal('settingsModal')"><i class="ph ph-gear"></i></div>
     </div>
 
     <div class="greeting">
@@ -224,6 +225,15 @@
     </div>
 
     <!-- Modals (Hidden by default, opened via buttons) -->
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h3>App Settings</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 5px 0 20px 0;">Version 1.0.1</p>
+            <button class="modal-btn" onclick="updateApp()">Update App via Vercel</button>
+            <button class="close-btn" onclick="closeModals()">Close</button>
+        </div>
+    </div>
     
     <div class="modal" id="downloadModal">
         <div class="modal-content">
