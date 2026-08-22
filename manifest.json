@@ -1,22 +1,23 @@
 {
-  "short_name": "NaviOS Speed",
-  "name": "NaviOS Speed Diagnostic & Forensic Analyzer",
+  "name": "NaviOS Import",
+  "short_name": "NaviOS",
+  "description": "Client-side media conversion and keyless HD extraction architecture.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#E5734A",
   "icons": [
     {
-      "src": "/icons/IMG_1292.png?v=2",
+      "src": "icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "sizes": "192x192"
+      "purpose": "any maskable"
     },
     {
-      "src": "/icons/IMG_1292.png?v=2",
+      "src": "icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "any maskable"
     }
-  ],
-  "start_url": "/index.html",
-  "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#0F172A",
-  "background_color": "#0F172A",
-  "description": "Exhaustive iOS hardware telemetry, storage optimization, and STIX2 forensic malware analysis."
+  ]
 }
