@@ -1,3 +1,12 @@
+// --- UI Control Functions ---
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+}
+
+function closeModals() {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => modal.style.display = 'none');
+}
 /**
  * Media Engine PWA Core Logic
  * Orchestrates proxy networking, binary parsing, and mathematical canvas manipulation.
