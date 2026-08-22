@@ -1,11 +1,11 @@
 {
-  "name": "Media Engine PWA",
-  "short_name": "MediaCore",
+  "name": "NaviOS Import",
+  "short_name": "NaviOS",
   "description": "Client-side media conversion and keyless HD extraction architecture.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#0A84FF",
+  "theme_color": "#E5734A",
   "icons": [
     {
       "src": "icon-192.png",
