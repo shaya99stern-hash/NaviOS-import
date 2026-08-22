@@ -260,6 +260,22 @@
             <button class="close-btn" onclick="closeModals()">Cancel</button>
         </div>
     </div>
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <h3>Video Processing</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Apply hardware-accelerated filters locally.</p>
+            <input type="file" id="videoFile" accept="video/mp4, video/quicktime">
+            <select id="videoFilter">
+                <option value="grayscale(100%)">B&W (Grayscale)</option>
+                <option value="contrast(150%) saturate(120%)">Vibrant Enhance</option>
+                <option value="sepia(100%)">Vintage Sepia</option>
+                <option value="blur(2px)">Soft Blur</option>
+            </select>
+            <button class="modal-btn" onclick="processVideo()">Process & Download</button>
+            <button class="close-btn" onclick="closeModals()">Cancel</button>
+            <div id="vidStatus" class="status" style="display:none; margin-top: 10px; color: var(--accent);">Processing...</div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
