@@ -222,3 +222,105 @@ function enhanceVisuals() {
     };
     reader.readAsDataURL(file);
 }
+// --- Storage Tracking Logic ---
+function incrementStorage(type) {
+    let count = parseInt(localStorage.getItem(type) || '0');
+    localStorage.setItem(type, count + 1);
+    updateStorageUI();
+}
+
+function updateStorageUI() {
+    const videoCount = localStorage.getItem('videos') || '0';
+    const imgCount = localStorage.getItem('images') || '0';
+    const audioCount = localStorage.getItem('audio') || '0';
+    
+    const cards = document.querySelectorAll('.storage-card');
+    if (cards.length >= 4) {
+        cards[1].querySelector('p').innerText = `${videoCount} items`; // Videos
+        cards[2].querySelector('p').innerText = `${audioCount} items`; // Songs
+        cards[3].querySelector('p').innerText = `${imgCount} items`;   // Images
+    }
+}
+
+// Update the original download trigger to track saved files
+function triggerDownload(url, filename) {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    
+    // Categorize and track the download
+    if (filename.includes('.mp4')) incrementStorage('videos');
+    else if (filename.includes('.png') || filename.includes('.jpg') || filename.includes('.pdf')) incrementStorage('images');
+    else if (filename.includes('.wav') || filename.includes('.mp3')) incrementStorage('audio');
+}
+
+// Populate storage numbers on app launch
+document.addEventListener('DOMContentLoaded', updateStorageUI);
+
+// --- Video Processing Engine ---
+function processVideo() {
+    const fileInput = document.getElementById('videoFile');
+    const filter = document.getElementById('videoFilter').value;
+    const status = document.getElementById('vidStatus');
+    
+    if (!fileInput.files.length) return alert('Select a video first.');
+    
+    status.style.display = 'block';
+    status.innerText = 'Initializing processing engine...';
+    
+    const file = fileInput.files[0];
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(file);
+    video.muted = true; // Required for iOS background processing
+    video.playsInline = true;
+
+    video.onloadeddata = () => {
+        status.innerText = 'Processing frames... Do not close app.';
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Capture stream at 30 frames per second
+        const stream = canvas.captureStream(30); 
+        
+        // Safari/iOS strict requirement for video/mp4 output
+        const options = MediaRecorder.isTypeSupported('video/mp4') 
+            ? { mimeType: 'video/mp4', videoBitsPerSecond: 2500000 } 
+            : { mimeType: 'video/webm' };
+            
+        const recorder = new MediaRecorder(stream, options); 
+        const chunks = [];
+        
+        recorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) chunks.push(e.data);
+        };
+        
+        recorder.onstop = () => {
+            status.innerText = 'Packaging file...';
+            const blob = new Blob(chunks, { type: options.mimeType });
+            triggerDownload(URL.createObjectURL(blob), `edited_vid_${Date.now()}.mp4`);
+            status.style.display = 'none';
+            closeModals();
+        };
+        
+        recorder.start();
+        video.play();
+        
+        // Paint the video onto the canvas frame-by-frame
+        function drawFrame() {
+            if (video.paused || video.ended) {
+                recorder.stop();
+                return;
+            }
+            ctx.filter = filter;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            requestAnimationFrame(drawFrame);
+        }
+        drawFrame();
+    };
+}
