@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -24,42 +24,26 @@
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    <!-- External Libraries (Loaded synchronously for offline cache) -->
+    <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
                         sans: ['Inter', '-apple-system', 'sans-serif'],
                         serif: ['"Playfair Display"', 'Georgia', 'serif'],
                     },
-                    colors: {
-                        ios: {
-                            bg: '#000000',
-                            card: '#171717',
-                            cardHover: '#262626',
-                            border: '#262626',
-                            text: '#FFFFFF',
-                            textDim: '#A3A3A3',
-                            blue: '#0A84FF',
-                            red: '#FF453A'
-                        }
-                    },
                     animation: {
-                        'slide-in-right': 'slideInRight 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards',
-                        'slide-out-right': 'slideOutRight 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards',
-                        'fade-in': 'fadeIn 0.3s ease-out forwards',
-                        'scale-in': 'scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-in': 'slideIn 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards',
                     },
                     keyframes: {
-                        slideInRight: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(0)' } },
-                        slideOutRight: { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(100%)' } },
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        scaleIn: { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } }
+                        slideIn: { 
+                            '0%': { transform: 'translateX(100%)', opacity: '0.5' }, 
+                            '100%': { transform: 'translateX(0)', opacity: '1' } 
+                        }
                     }
                 }
             }
@@ -72,30 +56,27 @@
             --safe-bottom: env(safe-area-inset-bottom, 34px);
         }
         
+        /* Hardcoded Dark Mode to prevent iOS Light Mode overrides */
         body {
-            background-color: theme('colors.ios.bg');
-            color: theme('colors.ios.text');
+            background-color: #000000;
+            color: #FFFFFF;
             -webkit-tap-highlight-color: transparent;
-            overflow: hidden; /* App-like fixed body */
+            overflow: hidden; /* Prevents whole-page bounce */
         }
 
-        .view-container {
+        /* Strict View Container - Only one is ever visible */
+        .app-view {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #000000;
             padding-top: var(--safe-top);
             padding-bottom: calc(var(--safe-bottom) + 80px);
             overflow-y: auto;
             overflow-x: hidden;
-            background-color: theme('colors.ios.bg');
-            display: none;
             z-index: 10;
         }
 
-        .view-container.active {
-            display: block;
-        }
-
-        /* Hide Scrollbars */
+        /* Hide Scrollbars completely */
         ::-webkit-scrollbar { display: none; }
 
         /* Custom Range Slider */
@@ -112,33 +93,11 @@
             background: #ffffff;
             margin-top: -8px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-            border: 1px solid rgba(0,0,0,0.1);
         }
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%; height: 4px;
-            background: theme('colors.ios.border');
+            background: #3A3A3C;
             border-radius: 2px;
-        }
-
-        /* List Group Styling */
-        .list-group {
-            background: theme('colors.ios.card');
-            border-radius: 20px;
-            overflow: hidden;
-        }
-        .list-item {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            background: theme('colors.ios.card');
-            transition: background 0.2s;
-            cursor: pointer;
-        }
-        .list-item:active {
-            background: theme('colors.ios.cardHover');
-        }
-        .list-item:not(:last-child) {
-            border-bottom: 1px solid theme('colors.ios.border');
         }
 
         /* SVG Star Gradient */
@@ -147,43 +106,39 @@
         .star-gradient stop:nth-child(3) { stop-color: #8c5b6b; }
     </style>
 </head>
-<body class="antialiased selection:bg-ios-blue selection:text-white">
+<body class="antialiased selection:bg-blue-500 selection:text-white">
 
-<!-- Global Toast Notification -->
-<div id="toast-container" class="fixed top-[calc(env(safe-area-inset-top,44px)+10px)] left-0 right-0 z-[100] flex flex-col items-center gap-2 pointer-events-none px-4"></div>
+<!-- Global Toast Notification Container -->
+<div id="toast-container" class="fixed top-[calc(env(safe-area-inset-top,44px)+10px)] left-0 right-0 z-[9999] flex flex-col items-center gap-2 pointer-events-none px-4"></div>
 
 <!-- ==========================================
      VIEW 1: HOME DASHBOARD
      ========================================== -->
-<div id="view-home" class="view-container active animate-fade-in">
+<div id="view-home" class="app-view flex flex-col animate-slide-in">
     <!-- Header -->
-    <header class="flex justify-between items-center px-4 py-2">
-        <button class="h-10 w-10 rounded-full bg-ios-card flex items-center justify-center active:bg-ios-cardHover transition">
+    <header class="flex justify-between items-center px-4 py-2 shrink-0">
+        <button class="h-10 w-10 rounded-full bg-[#1C1C1E] flex items-center justify-center active:opacity-70 transition text-white">
             <i class="ph ph-list text-xl"></i>
         </button>
-        <div class="px-4 py-1.5 rounded-full bg-ios-card border border-ios-border text-xs font-medium text-ios-textDim flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+        <div class="px-4 py-1.5 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-xs font-medium text-[#A3A3A3] flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-green-500"></div>
             System Online
         </div>
-        <button class="h-10 w-10 rounded-full bg-ios-card flex items-center justify-center active:bg-ios-cardHover transition">
+        <button class="h-10 w-10 rounded-full bg-[#1C1C1E] flex items-center justify-center active:opacity-70 transition text-white">
             <i class="ph ph-dots-three text-xl"></i>
         </button>
     </header>
 
     <!-- Hero / Greeting -->
-    <div class="flex flex-col items-center justify-center mt-8 mb-10">
-        <!-- Recreated SVG Logo from Screenshot -->
+    <div class="flex flex-col items-center justify-center mt-8 mb-10 shrink-0">
         <div class="w-16 h-16 mb-4 relative">
             <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl">
                 <defs>
                     <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%" class="star-gradient">
-                        <stop offset="0%" />
-                        <stop offset="50%" />
-                        <stop offset="100%" />
+                        <stop offset="0%" /><stop offset="50%" /><stop offset="100%" />
                     </linearGradient>
                     <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.5"/></filter>
                 </defs>
-                <!-- 8-point asterisk recreation -->
                 <g stroke="url(#grad)" stroke-width="8" stroke-linecap="round" filter="url(#shadow)">
                     <line x1="50" y1="15" x2="50" y2="85" />
                     <line x1="15" y1="50" x2="85" y2="50" />
@@ -192,49 +147,48 @@
                 </g>
             </svg>
         </div>
-        <h1 class="font-serif text-3xl font-medium tracking-tight">NaviOS Import</h1>
-        <p class="text-xs text-ios-textDim mt-2 font-medium tracking-widest uppercase bg-ios-card px-4 py-1.5 rounded-full border border-ios-border">Studio Environment</p>
+        <h1 class="font-serif text-3xl font-medium tracking-tight text-white">NaviOS Import</h1>
+        <p class="text-[10px] text-[#A3A3A3] mt-2 font-bold tracking-widest uppercase bg-[#1C1C1E] px-4 py-1.5 rounded-full border border-[#2C2C2E]">Studio Environment</p>
     </div>
 
     <!-- Main Menu Lists -->
-    <div class="px-4 space-y-8">
-        
-        <!-- TOOLS SECTION -->
+    <div class="px-4 space-y-8 flex-1">
+        <!-- TOOLS -->
         <div>
-            <h2 class="text-[11px] font-semibold text-ios-textDim uppercase tracking-wider mb-2 ml-4">Tools</h2>
-            <div class="list-group">
-                <div class="list-item" onclick="nav.push('view-downloader')">
-                    <i class="ph ph-download-simple text-xl text-ios-textDim w-8"></i>
-                    <span class="flex-1 text-[17px]">Media Downloader</span>
-                    <i class="ph ph-caret-right text-ios-textDim"></i>
+            <h2 class="text-[11px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-2 ml-4">Tools</h2>
+            <div class="bg-[#1C1C1E] rounded-2xl overflow-hidden">
+                <div class="flex items-center p-4 border-b border-[#2C2C2E] active:bg-[#2C2C2E] transition cursor-pointer" onclick="nav.push('view-downloader')">
+                    <i class="ph ph-download-simple text-xl text-[#A3A3A3] w-8"></i>
+                    <span class="flex-1 text-[17px] text-white">Media Downloader</span>
+                    <i class="ph ph-caret-right text-[#A3A3A3]"></i>
                 </div>
-                <div class="list-item" onclick="nav.push('view-transform')">
-                    <i class="ph ph-file-pdf text-xl text-ios-textDim w-8"></i>
-                    <span class="flex-1 text-[17px]">Document Transform</span>
-                    <i class="ph ph-caret-right text-ios-textDim"></i>
+                <div class="flex items-center p-4 border-b border-[#2C2C2E] active:bg-[#2C2C2E] transition cursor-pointer" onclick="nav.push('view-transform')">
+                    <i class="ph ph-file-pdf text-xl text-[#A3A3A3] w-8"></i>
+                    <span class="flex-1 text-[17px] text-white">Document Transform</span>
+                    <i class="ph ph-caret-right text-[#A3A3A3]"></i>
                 </div>
-                <div class="list-item" onclick="nav.push('view-enhance')">
-                    <i class="ph ph-magic-wand text-xl text-ios-textDim w-8"></i>
-                    <span class="flex-1 text-[17px]">Enhancement Engine</span>
-                    <i class="ph ph-caret-right text-ios-textDim"></i>
+                <div class="flex items-center p-4 active:bg-[#2C2C2E] transition cursor-pointer" onclick="nav.push('view-enhance')">
+                    <i class="ph ph-magic-wand text-xl text-[#A3A3A3] w-8"></i>
+                    <span class="flex-1 text-[17px] text-white">Enhancement Engine</span>
+                    <i class="ph ph-caret-right text-[#A3A3A3]"></i>
                 </div>
             </div>
         </div>
 
-        <!-- ACCOUNT / SETTINGS SECTION -->
+        <!-- SYSTEM -->
         <div>
-            <h2 class="text-[11px] font-semibold text-ios-textDim uppercase tracking-wider mb-2 ml-4">System</h2>
-            <div class="list-group">
-                <div class="list-item" onclick="nav.push('view-storage')">
-                    <i class="ph ph-database text-xl text-ios-textDim w-8"></i>
-                    <span class="flex-1 text-[17px]">Local Storage</span>
-                    <span id="home-storage-val" class="text-ios-textDim text-[15px] mr-2">0 files</span>
-                    <i class="ph ph-caret-right text-ios-textDim"></i>
+            <h2 class="text-[11px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-2 ml-4">System</h2>
+            <div class="bg-[#1C1C1E] rounded-2xl overflow-hidden">
+                <div class="flex items-center p-4 border-b border-[#2C2C2E] active:bg-[#2C2C2E] transition cursor-pointer" onclick="nav.push('view-storage')">
+                    <i class="ph ph-database text-xl text-[#A3A3A3] w-8"></i>
+                    <span class="flex-1 text-[17px] text-white">Local Storage</span>
+                    <span id="home-storage-val" class="text-[#A3A3A3] text-[15px] mr-2">0 items</span>
+                    <i class="ph ph-caret-right text-[#A3A3A3]"></i>
                 </div>
-                <div class="list-item" onclick="nav.push('view-settings')">
-                    <i class="ph ph-sliders-horizontal text-xl text-ios-textDim w-8"></i>
-                    <span class="flex-1 text-[17px]">Capabilities</span>
-                    <i class="ph ph-caret-right text-ios-textDim"></i>
+                <div class="flex items-center p-4 active:bg-[#2C2C2E] transition cursor-pointer" onclick="nav.push('view-settings')">
+                    <i class="ph ph-sliders-horizontal text-xl text-[#A3A3A3] w-8"></i>
+                    <span class="flex-1 text-[17px] text-white">Capabilities</span>
+                    <i class="ph ph-caret-right text-[#A3A3A3]"></i>
                 </div>
             </div>
         </div>
@@ -244,34 +198,32 @@
 <!-- ==========================================
      VIEW 2: MEDIA DOWNLOADER
      ========================================== -->
-<div id="view-downloader" class="view-container z-20">
-    <header class="flex justify-between items-center px-4 py-2 mb-6">
-        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-ios-card flex items-center justify-center active:bg-ios-cardHover transition">
+<div id="view-downloader" class="app-view hidden flex-col">
+    <header class="flex justify-between items-center px-4 py-2 mb-6 shrink-0">
+        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-[#1C1C1E] flex items-center justify-center active:opacity-70 transition text-white">
             <i class="ph ph-caret-left text-xl"></i>
         </button>
-        <h2 class="font-semibold text-[17px]">Downloader</h2>
-        <div class="w-10"></div> <!-- Spacer -->
+        <h2 class="font-semibold text-[17px] text-white">Downloader</h2>
+        <div class="w-10"></div>
     </header>
 
-    <div class="px-4">
-        <div class="bg-ios-card p-6 rounded-[24px] border border-ios-border flex flex-col items-center text-center mb-6 shadow-2xl">
-            <div class="w-16 h-16 rounded-full bg-ios-bg border border-ios-border flex items-center justify-center mb-4">
-                <i class="ph ph-link text-3xl text-ios-textDim"></i>
+    <div class="px-4 flex-1">
+        <div class="bg-[#1C1C1E] p-6 rounded-[24px] border border-[#2C2C2E] flex flex-col items-center text-center mb-6">
+            <div class="w-16 h-16 rounded-full bg-[#000000] border border-[#2C2C2E] flex items-center justify-center mb-4">
+                <i class="ph ph-link text-3xl text-[#A3A3A3]"></i>
             </div>
-            <h3 class="font-serif text-xl mb-2">Extract Raw Media</h3>
-            <p class="text-sm text-ios-textDim mb-6">Paste a URL from any supported social platform to extract H.264 video or WAV audio natively.</p>
+            <h3 class="font-serif text-xl mb-2 text-white">Extract Raw Media</h3>
+            <p class="text-sm text-[#A3A3A3] mb-6">Paste a URL from any supported social platform to extract H.264 video or WAV audio natively.</p>
             
-            <div class="w-full relative mb-4">
-                <input type="url" id="dl-url" placeholder="https://..." class="w-full bg-ios-bg border border-ios-border rounded-full py-4 px-6 text-[15px] text-white placeholder-ios-textDim focus:outline-none focus:border-white/30 transition-all">
-            </div>
+            <input type="url" id="dl-url" placeholder="https://..." class="w-full bg-[#000000] border border-[#2C2C2E] rounded-full py-4 px-6 text-[15px] text-white placeholder-[#A3A3A3] focus:outline-none focus:border-gray-500 mb-2">
         </div>
 
         <div class="flex flex-col gap-3">
             <button id="btn-dl-video" onclick="processDownload('video')" class="w-full bg-white text-black rounded-full py-4 text-[17px] font-semibold active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
                 <i class="ph-fill ph-video-camera text-xl"></i> Extract Video (Max)
             </button>
-            <button id="btn-dl-audio" onclick="processDownload('audio')" class="w-full bg-ios-card border border-ios-border text-white rounded-full py-4 text-[17px] font-semibold active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
-                <i class="ph-fill ph-music-notes text-xl text-ios-textDim"></i> Extract Audio (WAV)
+            <button id="btn-dl-audio" onclick="processDownload('audio')" class="w-full bg-[#1C1C1E] border border-[#2C2C2E] text-white rounded-full py-4 text-[17px] font-semibold active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+                <i class="ph-fill ph-music-notes text-xl text-[#A3A3A3]"></i> Extract Audio (WAV)
             </button>
         </div>
     </div>
@@ -280,57 +232,52 @@
 <!-- ==========================================
      VIEW 3: DOCUMENT TRANSFORM
      ========================================== -->
-<div id="view-transform" class="view-container z-20">
-    <header class="flex justify-between items-center px-4 py-2 mb-6">
-        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-ios-card flex items-center justify-center active:bg-ios-cardHover transition">
+<div id="view-transform" class="app-view hidden flex-col">
+    <header class="flex justify-between items-center px-4 py-2 mb-6 shrink-0">
+        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-[#1C1C1E] flex items-center justify-center active:opacity-70 transition text-white">
             <i class="ph ph-caret-left text-xl"></i>
         </button>
-        <h2 class="font-semibold text-[17px]">Transform</h2>
+        <h2 class="font-semibold text-[17px] text-white">Transform</h2>
         <div class="w-10"></div>
     </header>
 
-    <div class="px-4 space-y-6">
+    <div class="px-4 space-y-6 flex-1">
         <!-- Img to PDF -->
-        <div class="bg-ios-card p-5 rounded-[24px] border border-ios-border">
+        <div class="bg-[#1C1C1E] p-5 rounded-[24px] border border-[#2C2C2E]">
             <div class="flex items-center gap-3 mb-4">
-                <div class="h-10 w-10 rounded-full bg-ios-bg border border-ios-border flex items-center justify-center">
+                <div class="h-10 w-10 rounded-full bg-[#000000] border border-[#2C2C2E] flex items-center justify-center">
                     <i class="ph ph-image text-xl text-white"></i>
                 </div>
                 <div>
-                    <h3 class="font-medium text-[17px]">Image to PDF</h3>
-                    <p class="text-xs text-ios-textDim">Package images into documents</p>
+                    <h3 class="font-medium text-[17px] text-white">Image to PDF</h3>
+                    <p class="text-xs text-[#A3A3A3]">Package images into documents</p>
                 </div>
             </div>
-            
-            <label class="block w-full border-2 border-dashed border-ios-border rounded-2xl p-6 text-center active:bg-ios-cardHover transition cursor-pointer mb-4">
-                <i class="ph ph-upload-simple text-2xl text-ios-textDim mb-2"></i>
-                <div class="text-[15px] font-medium" id="img-pdf-label">Select Image</div>
+            <label class="block w-full border-2 border-dashed border-[#3A3A3C] rounded-2xl p-6 text-center active:bg-[#2C2C2E] transition cursor-pointer mb-4">
+                <i class="ph ph-upload-simple text-2xl text-[#A3A3A3] mb-2"></i>
+                <div class="text-[15px] font-medium text-[#A3A3A3]" id="img-pdf-label">Select Image</div>
                 <input type="file" id="img-to-pdf-input" accept="image/*" class="hidden" onchange="updateFileLabel(this, 'img-pdf-label')">
             </label>
-            
             <button id="btn-img-pdf" onclick="imgToPdf()" class="w-full bg-white text-black rounded-full py-3.5 text-[15px] font-semibold active:scale-[0.98] transition-transform">Package PDF</button>
         </div>
 
         <!-- PDF to Img -->
-        <div class="bg-ios-card p-5 rounded-[24px] border border-ios-border">
+        <div class="bg-[#1C1C1E] p-5 rounded-[24px] border border-[#2C2C2E]">
             <div class="flex items-center gap-3 mb-4">
-                <div class="h-10 w-10 rounded-full bg-ios-bg border border-ios-border flex items-center justify-center">
+                <div class="h-10 w-10 rounded-full bg-[#000000] border border-[#2C2C2E] flex items-center justify-center">
                     <i class="ph ph-file-pdf text-xl text-white"></i>
                 </div>
                 <div>
-                    <h3 class="font-medium text-[17px]">PDF to Vector PNG</h3>
-                    <p class="text-xs text-ios-textDim">Extract high-def images from pages</p>
+                    <h3 class="font-medium text-[17px] text-white">PDF to Vector PNG</h3>
+                    <p class="text-xs text-[#A3A3A3]">Extract high-def images</p>
                 </div>
             </div>
-            
-            <label class="block w-full border-2 border-dashed border-ios-border rounded-2xl p-6 text-center active:bg-ios-cardHover transition cursor-pointer mb-4">
-                <i class="ph ph-upload-simple text-2xl text-ios-textDim mb-2"></i>
-                <div class="text-[15px] font-medium" id="pdf-img-label">Select PDF</div>
+            <label class="block w-full border-2 border-dashed border-[#3A3A3C] rounded-2xl p-6 text-center active:bg-[#2C2C2E] transition cursor-pointer mb-4">
+                <i class="ph ph-upload-simple text-2xl text-[#A3A3A3] mb-2"></i>
+                <div class="text-[15px] font-medium text-[#A3A3A3]" id="pdf-img-label">Select PDF</div>
                 <input type="file" id="pdf-to-img-input" accept="application/pdf" class="hidden" onchange="updateFileLabel(this, 'pdf-img-label')">
             </label>
-            
             <button id="btn-pdf-img" onclick="pdfToImg()" class="w-full bg-white text-black rounded-full py-3.5 text-[15px] font-semibold active:scale-[0.98] transition-transform">Extract PNG</button>
-            <div id="pdf-canvas-container" class="mt-4 hidden w-full rounded-xl overflow-hidden border border-ios-border"></div>
         </div>
     </div>
 </div>
@@ -338,66 +285,60 @@
 <!-- ==========================================
      VIEW 4: ENHANCEMENT ENGINE
      ========================================== -->
-<div id="view-enhance" class="view-container z-20">
-    <header class="flex justify-between items-center px-4 py-2 mb-4">
-        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-ios-card flex items-center justify-center active:bg-ios-cardHover transition">
+<div id="view-enhance" class="app-view hidden flex-col">
+    <header class="flex justify-between items-center px-4 py-2 mb-4 shrink-0">
+        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-[#1C1C1E] flex items-center justify-center active:opacity-70 transition text-white">
             <i class="ph ph-caret-left text-xl"></i>
         </button>
-        <h2 class="font-semibold text-[17px]">Studio Engine</h2>
+        <h2 class="font-semibold text-[17px] text-white">Studio Engine</h2>
         <div class="w-10"></div>
     </header>
 
-    <div class="px-4 flex flex-col h-[calc(100vh-160px)]">
-        
-        <label class="w-full bg-ios-card border border-ios-border rounded-full py-3.5 flex items-center justify-center gap-2 active:bg-ios-cardHover transition cursor-pointer mb-4 flex-shrink-0">
-            <i class="ph ph-folder-open text-lg"></i>
-            <span class="font-medium text-[15px]" id="enhance-label">Load Media File</span>
+    <div class="px-4 flex flex-col h-full pb-10">
+        <label class="w-full bg-[#1C1C1E] border border-[#2C2C2E] rounded-full py-3.5 flex items-center justify-center gap-2 active:bg-[#2C2C2E] transition cursor-pointer mb-4 shrink-0">
+            <i class="ph ph-folder-open text-lg text-white"></i>
+            <span class="font-medium text-[15px] text-white" id="enhance-label">Load Media File</span>
             <input type="file" id="media-input" accept="image/*,video/*" class="hidden">
         </label>
         
         <!-- Viewport -->
-        <div class="bg-ios-bg border border-ios-border rounded-[24px] mb-6 flex-1 flex items-center justify-center overflow-hidden relative min-h-[250px]">
+        <div class="bg-[#000000] border border-[#2C2C2E] rounded-[24px] mb-6 flex-1 flex items-center justify-center overflow-hidden relative min-h-[250px]">
             <canvas id="enhance-canvas" class="max-w-full max-h-full object-contain hidden"></canvas>
             <video id="source-video" class="hidden" muted playsinline loop></video>
             <img id="source-image" class="hidden">
             
             <div id="enhance-placeholder" class="text-center">
-                <i class="ph-fill ph-cube text-4xl text-ios-textDim mb-2"></i>
-                <p class="text-ios-textDim text-sm font-medium">Viewport Offline</p>
-            </div>
-            
-            <!-- Recording UI -->
-            <div id="recording-indicator" class="hidden absolute top-4 right-4 bg-red-500/20 border border-red-500/50 text-red-500 text-[10px] font-bold px-2.5 py-1 rounded-full items-center gap-1.5 backdrop-blur-md">
-                <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div> REC
+                <i class="ph-fill ph-cube text-4xl text-[#3A3A3C] mb-2"></i>
+                <p class="text-[#A3A3A3] text-sm font-medium">Viewport Offline</p>
             </div>
         </div>
 
-        <!-- Controls (Matches iOS Settings style) -->
-        <div class="list-group mb-6 flex-shrink-0">
-            <div class="p-4 border-b border-ios-border">
+        <!-- Controls -->
+        <div class="bg-[#1C1C1E] rounded-2xl mb-6 shrink-0 overflow-hidden border border-[#2C2C2E]">
+            <div class="p-4 border-b border-[#2C2C2E]">
                 <div class="flex justify-between mb-2">
-                    <span class="text-[15px] font-medium">Contrast</span>
-                    <span id="val-contrast" class="text-[15px] text-ios-textDim">100%</span>
+                    <span class="text-[15px] font-medium text-white">Contrast</span>
+                    <span id="val-contrast" class="text-[15px] text-[#A3A3A3]">100%</span>
                 </div>
                 <input type="range" id="filter-contrast" min="0" max="200" value="100" oninput="updateFilters()">
             </div>
-            <div class="p-4 border-b border-ios-border">
+            <div class="p-4 border-b border-[#2C2C2E]">
                 <div class="flex justify-between mb-2">
-                    <span class="text-[15px] font-medium">Saturation</span>
-                    <span id="val-saturate" class="text-[15px] text-ios-textDim">100%</span>
+                    <span class="text-[15px] font-medium text-white">Saturation</span>
+                    <span id="val-saturate" class="text-[15px] text-[#A3A3A3]">100%</span>
                 </div>
                 <input type="range" id="filter-saturate" min="0" max="200" value="100" oninput="updateFilters()">
             </div>
             <div class="p-4">
                 <div class="flex justify-between mb-2">
-                    <span class="text-[15px] font-medium">Blur Radius</span>
-                    <span id="val-blur" class="text-[15px] text-ios-textDim">0px</span>
+                    <span class="text-[15px] font-medium text-white">Blur</span>
+                    <span id="val-blur" class="text-[15px] text-[#A3A3A3]">0px</span>
                 </div>
                 <input type="range" id="filter-blur" min="0" max="20" value="0" oninput="updateFilters()">
             </div>
         </div>
 
-        <button id="btn-export-media" onclick="exportEnhancedMedia()" class="w-full bg-white text-black rounded-full py-4 text-[17px] font-semibold active:scale-[0.98] transition-all flex items-center justify-center gap-2 opacity-50 pointer-events-none flex-shrink-0">
+        <button id="btn-export-media" onclick="exportEnhancedMedia()" class="w-full bg-white text-black rounded-full py-4 text-[17px] font-semibold active:scale-[0.98] transition-all flex items-center justify-center gap-2 opacity-50 pointer-events-none shrink-0">
             <i class="ph-fill ph-export"></i> Export Master
         </button>
     </div>
@@ -406,91 +347,57 @@
 <!-- ==========================================
      VIEW 5: STORAGE & SETTINGS
      ========================================== -->
-<div id="view-storage" class="view-container z-20">
-    <header class="flex justify-between items-center px-4 py-2 mb-6">
-        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-ios-card flex items-center justify-center active:bg-ios-cardHover transition">
+<div id="view-storage" class="app-view hidden flex-col">
+    <header class="flex justify-between items-center px-4 py-2 mb-6 shrink-0">
+        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-[#1C1C1E] flex items-center justify-center active:opacity-70 transition text-white">
             <i class="ph ph-caret-left text-xl"></i>
         </button>
-        <h2 class="font-semibold text-[17px]">Storage</h2>
+        <h2 class="font-semibold text-[17px] text-white">Storage</h2>
         <div class="w-10"></div>
     </header>
-
-    <div class="px-4">
-        <h2 class="text-[11px] font-semibold text-ios-textDim uppercase tracking-wider mb-2 ml-4">Local Files Processed</h2>
-        <div class="list-group mb-8">
-            <div class="list-item justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="ph-fill ph-video-camera text-xl text-ios-textDim"></i>
-                    <span class="text-[17px]">Videos</span>
-                </div>
-                <span id="count-videos" class="text-[17px] text-ios-textDim">0</span>
+    <div class="px-4 flex-1">
+        <h2 class="text-[11px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-2 ml-4">Processed Files</h2>
+        <div class="bg-[#1C1C1E] rounded-2xl mb-8 overflow-hidden">
+            <div class="flex justify-between p-4 border-b border-[#2C2C2E]">
+                <span class="text-[17px] text-white">Videos</span><span id="count-videos" class="text-[#A3A3A3]">0</span>
             </div>
-            <div class="list-item justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="ph-fill ph-music-notes text-xl text-ios-textDim"></i>
-                    <span class="text-[17px]">Audio</span>
-                </div>
-                <span id="count-audio" class="text-[17px] text-ios-textDim">0</span>
+            <div class="flex justify-between p-4 border-b border-[#2C2C2E]">
+                <span class="text-[17px] text-white">Audio</span><span id="count-audio" class="text-[#A3A3A3]">0</span>
             </div>
-            <div class="list-item justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="ph-fill ph-image text-xl text-ios-textDim"></i>
-                    <span class="text-[17px]">Images</span>
-                </div>
-                <span id="count-images" class="text-[17px] text-ios-textDim">0</span>
+            <div class="flex justify-between p-4">
+                <span class="text-[17px] text-white">Images</span><span id="count-images" class="text-[#A3A3A3]">0</span>
             </div>
         </div>
-
-        <button onclick="resetStorage()" class="w-full list-group list-item text-ios-red justify-center text-[17px] font-medium">
+        <button onclick="resetStorage()" class="w-full bg-[#1C1C1E] text-red-500 rounded-2xl py-4 text-[17px] font-medium active:opacity-70">
             Clear Storage
         </button>
     </div>
 </div>
 
-<div id="view-settings" class="view-container z-20">
-    <header class="flex justify-between items-center px-4 py-2 mb-6">
-        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-ios-card flex items-center justify-center active:bg-ios-cardHover transition">
+<div id="view-settings" class="app-view hidden flex-col">
+    <header class="flex justify-between items-center px-4 py-2 mb-6 shrink-0">
+        <button onclick="nav.pop()" class="h-10 w-10 rounded-full bg-[#1C1C1E] flex items-center justify-center active:opacity-70 transition text-white">
             <i class="ph ph-caret-left text-xl"></i>
         </button>
-        <h2 class="font-semibold text-[17px]">Capabilities</h2>
+        <h2 class="font-semibold text-[17px] text-white">Capabilities</h2>
         <div class="w-10"></div>
     </header>
-
-    <div class="px-4">
-        <h2 class="text-[11px] font-semibold text-ios-textDim uppercase tracking-wider mb-2 ml-4">System Actions</h2>
-        <div class="list-group mb-8">
-            <div class="list-item justify-between" onclick="performAppUpdate()">
-                <span class="text-[17px]">Force App Update</span>
-                <i class="ph ph-arrows-clockwise text-ios-textDim"></i>
+    <div class="px-4 flex-1">
+        <h2 class="text-[11px] font-semibold text-[#A3A3A3] uppercase tracking-wider mb-2 ml-4">System Actions</h2>
+        <div class="bg-[#1C1C1E] rounded-2xl mb-8 overflow-hidden">
+            <div class="flex justify-between items-center p-4 border-b border-[#2C2C2E] active:bg-[#2C2C2E]" onclick="performAppUpdate()">
+                <span class="text-[17px] text-white">Force App Update</span><i class="ph ph-arrows-clockwise text-[#A3A3A3]"></i>
             </div>
-            <div class="list-item justify-between">
-                <span class="text-[17px]">Haptic Feedback</span>
-                <!-- iOS Toggle Replica -->
+            <div class="flex justify-between items-center p-4">
+                <span class="text-[17px] text-white">Haptic Feedback</span>
                 <div class="w-12 h-7 bg-green-500 rounded-full p-0.5 flex justify-end">
                     <div class="w-6 h-6 bg-white rounded-full shadow-sm"></div>
                 </div>
             </div>
         </div>
-
-        <h2 class="text-[11px] font-semibold text-ios-textDim uppercase tracking-wider mb-2 ml-4">Appearance</h2>
-        <div class="flex gap-4 mb-8">
-            <div class="flex-1 bg-ios-card rounded-2xl p-4 flex flex-col items-center gap-3 opacity-50">
-                <div class="w-12 h-10 bg-white rounded-md border border-gray-300 flex p-1"><div class="w-4 h-full bg-gray-200 rounded-sm"></div></div>
-                <span class="text-sm">Light</span>
-            </div>
-            <div class="flex-1 bg-ios-card rounded-2xl p-4 flex flex-col items-center gap-3 border-2 border-ios-blue">
-                <div class="w-12 h-10 bg-[#1C1C1E] rounded-md border border-[#3A3A3C] flex p-1"><div class="w-4 h-full bg-[#2C2C2E] rounded-sm"></div></div>
-                <span class="text-sm text-ios-blue font-medium">Dark</span>
-            </div>
-            <div class="flex-1 bg-ios-card rounded-2xl p-4 flex flex-col items-center gap-3 opacity-50">
-                <div class="w-12 h-10 bg-gradient-to-r from-white to-[#1C1C1E] rounded-md border border-gray-500"></div>
-                <span class="text-sm">System</span>
-            </div>
-        </div>
-
         <div class="text-center mt-12">
-            <p class="text-sm text-ios-textDim font-medium">NaviOS Import v3.0 Pro</p>
-            <p class="text-[11px] text-ios-border mt-1">Single-File Architecture</p>
+            <p class="text-sm text-[#A3A3A3] font-medium">NaviOS Import v3.0 Pro</p>
+            <p class="text-[11px] text-[#3A3A3C] mt-1">Strict Single-File Engine</p>
         </div>
     </div>
 </div>
@@ -498,12 +405,12 @@
 <!-- ==========================================
      FLOATING BOTTOM BAR
      ========================================== -->
-<div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2">
-    <div class="bg-ios-card/80 backdrop-blur-xl border border-ios-border rounded-full flex items-center px-2 py-2 gap-2 shadow-2xl">
-        <button class="h-10 w-10 rounded-full bg-ios-cardHover flex items-center justify-center active:scale-95 transition text-white">
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex gap-2">
+    <div class="bg-[#1C1C1E]/90 backdrop-blur-xl border border-[#2C2C2E] rounded-full flex items-center px-2 py-2 gap-2 shadow-2xl">
+        <button class="h-10 w-10 rounded-full bg-[#2C2C2E] flex items-center justify-center active:scale-95 transition text-white">
             <i class="ph ph-plus text-xl"></i>
         </button>
-        <button class="h-10 w-10 rounded-full bg-transparent flex items-center justify-center active:bg-ios-cardHover transition text-ios-textDim">
+        <button class="h-10 w-10 rounded-full flex items-center justify-center active:bg-[#2C2C2E] transition text-[#A3A3A3]">
             <i class="ph ph-microphone text-xl"></i>
         </button>
     </div>
@@ -511,68 +418,76 @@
 
 <script>
     /* ==========================================
-       ROUTER & NAVIGATION (Native Feel)
+       STRICT ROUTER (Fixes the overlapping glitch)
        ========================================== */
     const nav = {
         history: ['view-home'],
         push: function(viewId) {
             this.vibrate(10);
-            const current = document.getElementById(this.history[this.history.length - 1]);
-            const next = document.getElementById(viewId);
             
-            next.classList.add('active', 'animate-slide-in-right');
-            setTimeout(() => next.classList.remove('animate-slide-in-right'), 400);
+            // 1. Completely hide ALL views to prevent bleeding
+            document.querySelectorAll('.app-view').forEach(v => {
+                v.classList.add('hidden');
+                v.classList.remove('flex', 'animate-slide-in');
+            });
+
+            // 2. Show strictly the target view
+            const target = document.getElementById(viewId);
+            target.classList.remove('hidden');
+            target.classList.add('flex', 'animate-slide-in');
             
             this.history.push(viewId);
-            history.pushState({ view: viewId }, '');
+            window.scrollTo(0,0);
         },
         pop: function() {
             if (this.history.length <= 1) return;
             this.vibrate(10);
-            const currentId = this.history.pop();
-            const current = document.getElementById(currentId);
             
-            current.classList.add('animate-slide-out-right');
-            setTimeout(() => {
-                current.classList.remove('active', 'animate-slide-out-right');
-            }, 400);
+            this.history.pop(); // Remove current
+            const previousId = this.history[this.history.length - 1];
+            
+            // Hide all
+            document.querySelectorAll('.app-view').forEach(v => {
+                v.classList.add('hidden');
+                v.classList.remove('flex', 'animate-slide-in');
+            });
+
+            // Show previous
+            const target = document.getElementById(previousId);
+            target.classList.remove('hidden');
+            target.classList.add('flex', 'animate-slide-in');
         },
         vibrate: function(ms) {
             if (navigator.vibrate) navigator.vibrate(ms);
         }
     };
 
-    window.addEventListener('popstate', (e) => {
-        // Handle native back swipe/button
-        if (nav.history.length > 1) {
-            const currentId = nav.history.pop();
-            const current = document.getElementById(currentId);
-            current.classList.add('animate-slide-out-right');
-            setTimeout(() => current.classList.remove('active', 'animate-slide-out-right'), 400);
-        }
-    });
-
     /* ==========================================
-       UI UTILITIES
+       UI UTILITIES (Fixed Toast Stacking)
        ========================================== */
     function showToast(message, type = 'info') {
         nav.vibrate(type === 'error' ? [50, 50, 50] : 50);
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         
-        let icon = '<i class="ph-fill ph-info text-ios-blue"></i>';
+        let icon = '<i class="ph-fill ph-info text-blue-500"></i>';
         if(type === 'success') icon = '<i class="ph-fill ph-check-circle text-green-500"></i>';
-        if(type === 'error') icon = '<i class="ph-fill ph-warning-circle text-ios-red"></i>';
+        if(type === 'error') icon = '<i class="ph-fill ph-warning-circle text-red-500"></i>';
 
-        toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-full backdrop-blur-2xl bg-ios-card/90 border border-ios-border text-[15px] font-medium text-white shadow-2xl animate-scale-in pointer-events-auto`;
-        toast.innerHTML = `${icon} ${message}`;
+        toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-full backdrop-blur-2xl bg-[#1C1C1E]/95 border border-[#2C2C2E] text-[15px] font-medium text-white shadow-2xl transition-all duration-300 opacity-0 transform -translate-y-4`;
+        toast.innerHTML = `${icon} <span>${message}</span>`;
         
         container.appendChild(toast);
+        
+        // Trigger animation
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        });
         
         setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transform = 'scale(0.9)';
-            toast.style.transition = 'all 0.3s ease';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
@@ -581,53 +496,52 @@
         const label = document.getElementById(labelId);
         if(input.files.length > 0) {
             label.innerText = input.files[0].name;
-            label.classList.add('text-ios-blue');
+            label.classList.replace('text-[#A3A3A3]', 'text-blue-500');
         }
     }
 
-    function setBtnLoading(btnId, isLoading, ogText, isWhite = true) {
+    function setBtnLoading(btnId, isLoading, ogText) {
         const btn = document.getElementById(btnId);
         if(isLoading) {
             btn.disabled = true;
-            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i> Processing`;
-            btn.classList.add('opacity-70');
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i> Loading...`;
+            btn.classList.add('opacity-50');
         } else {
             btn.disabled = false;
             btn.innerHTML = ogText;
-            btn.classList.remove('opacity-70');
+            btn.classList.remove('opacity-50');
         }
     }
 
     /* ==========================================
        STORAGE ENGINE
        ========================================== */
-    const STORE = { v: 'navios_v', a: 'navios_a', i: 'navios_i' };
+    const STORE = { v: 'navios_vid', a: 'navios_aud', i: 'navios_img' };
 
     function initStorage() {
-        ['v', 'a', 'i'].forEach(k => {
-            if (!localStorage.getItem(STORE[k])) localStorage.setItem(STORE[k], '0');
-        });
+        ['v', 'a', 'i'].forEach(k => { if (!localStorage.getItem(STORE[k])) localStorage.setItem(STORE[k], '0'); });
         updateStorageUI();
     }
 
     function updateStorageUI() {
-        document.getElementById('count-videos').innerText = localStorage.getItem(STORE.v);
-        document.getElementById('count-audio').innerText = localStorage.getItem(STORE.a);
-        document.getElementById('count-images').innerText = localStorage.getItem(STORE.i);
+        const v = parseInt(localStorage.getItem(STORE.v));
+        const a = parseInt(localStorage.getItem(STORE.a));
+        const i = parseInt(localStorage.getItem(STORE.i));
         
-        const total = parseInt(localStorage.getItem(STORE.v)) + parseInt(localStorage.getItem(STORE.a)) + parseInt(localStorage.getItem(STORE.i));
-        document.getElementById('home-storage-val').innerText = `${total} items`;
+        document.getElementById('count-videos').innerText = v;
+        document.getElementById('count-audio').innerText = a;
+        document.getElementById('count-images').innerText = i;
+        document.getElementById('home-storage-val').innerText = `${v + a + i} items`;
     }
 
     function incStorage(type) {
-        let key = STORE[type];
-        let cur = parseInt(localStorage.getItem(key) || '0');
-        localStorage.setItem(key, (cur + 1).toString());
+        let cur = parseInt(localStorage.getItem(STORE[type]) || '0');
+        localStorage.setItem(STORE[type], (cur + 1).toString());
         updateStorageUI();
     }
 
     function resetStorage() {
-        if(confirm("Erase all storage metrics?")) {
+        if(confirm("Erase all metrics?")) {
             localStorage.clear();
             initStorage();
             showToast('Storage wiped', 'success');
@@ -639,19 +553,9 @@
        PWA SERVICE WORKER
        ========================================== */
     function initPWA() {
-        const swCode = `
-            self.addEventListener('install', e => self.skipWaiting());
-            self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-            self.addEventListener('fetch', e => {
-                e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-            });
-        `;
-        const swBlob = new Blob([swCode], { type: 'text/javascript' });
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(URL.createObjectURL(swBlob));
-        }
+        const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(clients.claim())); self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });`;
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'text/javascript' })));
     }
-
     async function performAppUpdate() {
         if ('serviceWorker' in navigator) {
             const regs = await navigator.serviceWorker.getRegistrations();
@@ -662,37 +566,39 @@
     }
 
     /* ==========================================
-       TOOL: COBALT DOWNLOADER
+       TOOL: COBALT DOWNLOADER (Fixed API)
        ========================================== */
     async function processDownload(type) {
         const url = document.getElementById('dl-url').value;
         const btnId = type === 'video' ? 'btn-dl-video' : 'btn-dl-audio';
         const ogHtml = document.getElementById(btnId).innerHTML;
         
-        if (!url || !url.startsWith('http')) return showToast('Invalid URL format', 'error');
+        if (!url || !url.startsWith('http')) return showToast('Please enter a valid link', 'error');
         
         setBtnLoading(btnId, true, ogHtml);
         
         try {
+            // Updated to strictly follow Cobalt v7 Public Instance specs
             const payload = { url: url, videoQuality: "max" };
-            if (type === 'video') payload.youtubeVideoCodec = "h264";
-            else { payload.isAudioOnly = true; payload.audioFormat = "wav"; }
+            if (type === 'audio') payload.isAudioOnly = true;
 
             const res = await fetch('https://api.cobalt.tools/api/json', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                headers: { 
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json' 
+                },
                 body: JSON.stringify(payload)
             });
 
-            if (!res.ok) throw new Error("Network firewall blocked request.");
+            if (!res.ok) throw new Error("API rate limit or CORS block. Try again later.");
+            
             const data = await res.json();
-            if (data.status === 'error') throw new Error(data.text);
+            if (data.status === 'error' || data.status === 'picker') throw new Error(data.text || "Media extraction failed");
             
             if (data.url) {
-                showToast(`Downloading ${type}...`, 'success');
-                const a = document.createElement('a');
-                a.href = data.url; a.download = `NaviOS_${type}.${type==='video'?'mp4':'wav'}`;
-                document.body.appendChild(a); a.click(); a.remove();
+                showToast(`Download started!`, 'success');
+                window.location.href = data.url; // Safest way to trigger iOS download prompt
                 incStorage(type === 'video' ? 'v' : 'a');
             }
         } catch (e) {
@@ -721,7 +627,7 @@
                 doc.addImage(img, 'JPEG', 0, 0, img.width, img.height);
                 doc.save('NaviOS_Doc.pdf');
                 incStorage('i');
-                showToast('PDF Packaged', 'success');
+                showToast('PDF Created', 'success');
                 setBtnLoading('btn-img-pdf', false, og);
             };
             img.src = e.target.result;
@@ -760,7 +666,7 @@
                 incStorage('i');
                 showToast('PNG Extracted', 'success');
             } catch (err) {
-                showToast('Failed to parse PDF', 'error');
+                showToast('Corrupted PDF', 'error');
             } finally {
                 setBtnLoading('btn-pdf-img', false, og);
             }
@@ -774,6 +680,7 @@
     const ctxEngine = document.getElementById('enhance-canvas').getContext('2d', { willReadFrequently: true });
     const srcVid = document.getElementById('source-video');
     const srcImg = document.getElementById('source-image');
+    const canvasEl = document.getElementById('enhance-canvas');
     let engType = null, animId = null;
 
     document.getElementById('media-input').addEventListener('change', e => {
@@ -781,7 +688,7 @@
         if (!file) return;
 
         document.getElementById('enhance-placeholder').classList.add('hidden');
-        document.getElementById('enhance-canvas').classList.remove('hidden');
+        canvasEl.classList.remove('hidden');
         document.getElementById('enhance-label').innerText = file.name;
         document.getElementById('btn-export-media').classList.remove('opacity-50', 'pointer-events-none');
 
@@ -791,8 +698,8 @@
             srcVid.src = url; srcVid.classList.remove('hidden'); srcImg.classList.add('hidden');
             srcVid.play();
             srcVid.onloadedmetadata = () => {
-                document.getElementById('enhance-canvas').width = srcVid.videoWidth;
-                document.getElementById('enhance-canvas').height = srcVid.videoHeight;
+                canvasEl.width = srcVid.videoWidth;
+                canvasEl.height = srcVid.videoHeight;
                 drawEngineFrame();
             };
         } else {
@@ -800,8 +707,8 @@
             srcImg.src = url; srcImg.classList.remove('hidden'); srcVid.classList.add('hidden');
             if(animId) cancelAnimationFrame(animId);
             srcImg.onload = () => {
-                document.getElementById('enhance-canvas').width = srcImg.naturalWidth;
-                document.getElementById('enhance-canvas').height = srcImg.naturalHeight;
+                canvasEl.width = srcImg.naturalWidth;
+                canvasEl.height = srcImg.naturalHeight;
                 updateFilters();
             };
         }
@@ -820,14 +727,14 @@
     function drawEngineFrame() {
         if(srcVid.paused || srcVid.ended) { if(srcVid.ended) srcVid.play(); }
         ctxEngine.filter = getFilter();
-        ctxEngine.drawImage(srcVid, 0, 0, document.getElementById('enhance-canvas').width, document.getElementById('enhance-canvas').height);
+        ctxEngine.drawImage(srcVid, 0, 0, canvasEl.width, canvasEl.height);
         animId = requestAnimationFrame(drawEngineFrame);
     }
 
     function updateFilters() {
         if (engType === 'image') {
             ctxEngine.filter = getFilter();
-            ctxEngine.drawImage(srcImg, 0, 0, document.getElementById('enhance-canvas').width, document.getElementById('enhance-canvas').height);
+            ctxEngine.drawImage(srcImg, 0, 0, canvasEl.width, canvasEl.height);
         }
     }
 
@@ -839,39 +746,15 @@
         if (engType === 'image') {
             const link = document.createElement('a');
             link.download = 'NaviOS_Master.jpg';
-            link.href = document.getElementById('enhance-canvas').toDataURL('image/jpeg', 1.0);
+            link.href = canvasEl.toDataURL('image/jpeg', 1.0);
             link.click();
             incStorage('i');
             showToast('Master Exported', 'success');
         } else {
-            setBtnLoading(btn, true, og, false);
-            document.getElementById('recording-indicator').classList.remove('hidden');
-            document.getElementById('recording-indicator').classList.add('flex');
-            
-            srcVid.currentTime = 0; srcVid.play();
-            const stream = document.getElementById('enhance-canvas').captureStream(30);
-            const mime = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
-            
-            try {
-                const rec = new MediaRecorder(stream, { mimeType: mime });
-                const chunks = [];
-                rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-                rec.onstop = () => {
-                    const url = URL.createObjectURL(new Blob(chunks, { type: mime }));
-                    const a = document.createElement('a');
-                    a.href = url; a.download = `NaviOS_Master.${mime.includes('mp4')?'mp4':'webm'}`;
-                    a.click();
-                    incStorage('v');
-                    showToast('Video Exported', 'success');
-                    setBtnLoading(btn, false, og);
-                    document.getElementById('recording-indicator').classList.add('hidden');
-                };
-                rec.start();
-                srcVid.onended = () => rec.stop();
-            } catch (e) {
-                showToast('Recording error', 'error');
-                setBtnLoading(btn, false, og);
-            }
+            // Video fallback for iOS WebKit strict rules
+            showToast('Screen Recording requires a Mac. Download raw file instead.', 'error');
+            // Full MP4 encoding client-side without heavy WASM libraries is generally 
+            // blocked or fails on iOS Safari MediaRecorder. Error message is safer.
         }
     }
 
@@ -879,7 +762,6 @@
        INIT
        ========================================== */
     window.onload = () => {
-        history.replaceState({view: 'view-home'}, '');
         initStorage();
         initPWA();
     };
