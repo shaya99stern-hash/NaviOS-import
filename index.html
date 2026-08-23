@@ -3,25 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="NaviOS Pro">
+    <meta name="apple-mobile-web-app-title" content="NaviOS">
     
-    <title>NaviOS Import Pro</title>
-    
-    <!-- Fonts -->
+    <title>NaviOS Pro Hub</title>
+
+    <!-- Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    <!-- External Libraries -->
+    <!-- External Binary Parsers -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
@@ -37,14 +34,19 @@
                     colors: {
                         apple: {
                             bg: '#000000',
-                            card: '#171717',
-                            cardHover: '#262626',
+                            card: '#1C1C1E',
                             border: '#2C2C2E',
                             text: '#FFFFFF',
-                            textDim: '#A3A3A3',
+                            dim: '#A3A3A3',
                             blue: '#0A84FF',
-                            accent: '#E5A059'
+                            accent: '#C78B6D'
                         }
+                    },
+                    animation: {
+                        'slide-in': 'slideIn 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+                    },
+                    keyframes: {
+                        slideIn: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(0)' } }
                     }
                 }
             }
@@ -66,77 +68,41 @@
         }
 
         .view-layer {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background-color: theme('colors.apple.bg');
             padding-top: var(--safe-top);
-            padding-bottom: calc(var(--safe-bottom) + 90px);
-            overflow-y: auto;
-            overflow-x: hidden;
+            padding-bottom: calc(var(--safe-bottom) + 100px);
+            overflow-y: auto; overflow-x: hidden;
+            display: none;
             z-index: 10;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateX(20px);
-            transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
-
-        .view-layer.active {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(0);
-            z-index: 20;
-        }
+        .view-layer.active { display: block; }
 
         ::-webkit-scrollbar { display: none; }
 
-        /* Pro Sliders */
+        /* Hardware-Accelerated Sliders */
         input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-            height: 24px;
+            -webkit-appearance: none; width: 100%; background: transparent; height: 24px;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 20px; width: 20px;
-            border-radius: 50%;
-            background: #ffffff;
-            margin-top: -9px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.2);
-            cursor: pointer;
+            height: 22px; width: 22px; border-radius: 50%;
+            background: #ffffff; margin-top: -10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
         }
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 2px;
-            background: theme('colors.apple.border');
-            border-radius: 2px;
+            width: 100%; height: 3px; background: theme('colors.apple.border'); border-radius: 2px;
         }
-        
-        /* Pro Tools Scroll */
+
         .tools-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 4px 16px;
-            scroll-snap-type: x mandatory;
+            display: flex; gap: 10px; overflow-x: auto; padding: 4px 16px; scroll-snap-type: x mandatory;
         }
         .tool-btn {
-            scroll-snap-align: start;
-            flex-shrink: 0;
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: theme('colors.apple.card');
-            border: 1px solid theme('colors.apple.border');
-            color: theme('colors.apple.textDim');
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.2s;
+            scroll-snap-align: start; flex-shrink: 0; padding: 8px 18px; border-radius: 20px;
+            background: theme('colors.apple.card'); border: 1px solid theme('colors.apple.border');
+            color: theme('colors.apple.dim'); font-size: 13px; font-weight: 600; transition: 0.2s;
         }
-        .tool-btn.active {
-            background: theme('colors.apple.text');
-            color: theme('colors.apple.bg');
-            border-color: theme('colors.apple.text');
-        }
+        .tool-btn.active { background: theme('colors.apple.text'); color: theme('colors.apple.bg'); }
 
         .star-grad stop:nth-child(1) { stop-color: #E6D0B3; }
         .star-grad stop:nth-child(2) { stop-color: #C78B6D; }
@@ -145,82 +111,77 @@
 </head>
 <body class="antialiased selection:bg-apple-blue selection:text-white">
 
-<!-- Global Toast Container -->
 <div id="toast-container" class="fixed top-[calc(env(safe-area-inset-top,44px)+10px)] left-0 right-0 z-[9999] flex flex-col items-center gap-2 pointer-events-none px-4"></div>
 
 <!-- ==========================================
-     VIEW 1: DASHBOARD
+     VIEW: DASHBOARD
      ========================================== -->
-<div id="view-home" class="view-layer active">
+<div id="view-home" class="view-layer active animate-slide-in">
     <header class="flex justify-between items-center px-5 py-2">
-        <button class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:bg-apple-cardHover transition"><i class="ph ph-list text-xl"></i></button>
-        <div class="px-4 py-1.5 rounded-full bg-apple-card border border-apple-border text-[11px] font-bold tracking-wide text-apple-textDim flex items-center gap-2 uppercase">
+        <button class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:opacity-70 transition"><i class="ph ph-list text-xl"></i></button>
+        <div class="px-4 py-1.5 rounded-full bg-apple-card border border-apple-border text-[11px] font-bold tracking-wide text-apple-dim flex items-center gap-2 uppercase">
             <div class="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
             System Online
         </div>
-        <button class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:bg-apple-cardHover transition"><i class="ph ph-dots-three text-xl"></i></button>
+        <button class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:opacity-70 transition"><i class="ph ph-dots-three text-xl"></i></button>
     </header>
 
     <div class="flex flex-col items-center justify-center mt-6 mb-10">
         <div class="w-20 h-20 mb-5 relative">
             <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl">
                 <defs>
-                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%" class="star-grad">
-                        <stop offset="0%" /><stop offset="50%" /><stop offset="100%" />
-                    </linearGradient>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%" class="star-grad"><stop offset="0%" /><stop offset="50%" /><stop offset="100%" /></linearGradient>
                     <filter id="glow"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.4" flood-color="#C78B6D"/></filter>
                 </defs>
                 <g stroke="url(#grad)" stroke-width="8" stroke-linecap="round" filter="url(#glow)">
-                    <line x1="50" y1="12" x2="50" y2="88" />
-                    <line x1="12" y1="50" x2="88" y2="50" />
-                    <line x1="23" y1="23" x2="77" y2="77" />
-                    <line x1="23" y1="77" x2="77" y2="23" />
+                    <line x1="50" y1="12" x2="50" y2="88" /><line x1="12" y1="50" x2="88" y2="50" />
+                    <line x1="23" y1="23" x2="77" y2="77" /><line x1="23" y1="77" x2="77" y2="23" />
                 </g>
             </svg>
         </div>
-        <h1 class="font-serif text-3xl font-semibold tracking-tight text-white">NaviOS Import</h1>
-        <p class="text-[10px] text-apple-textDim mt-2 font-bold tracking-widest uppercase bg-apple-card px-4 py-1.5 rounded-full border border-apple-border shadow-inner">Pro Studio Environment</p>
+        <h1 class="font-serif text-[32px] font-semibold tracking-tight text-white leading-none">NaviOS Import</h1>
+        <p class="text-[10px] text-apple-dim mt-3 font-bold tracking-widest uppercase bg-apple-card px-4 py-1.5 rounded-full border border-apple-border shadow-inner">WebGL Studio Environment</p>
     </div>
 
     <div class="px-5 space-y-8">
         <div>
-            <h2 class="text-[11px] font-bold text-apple-textDim uppercase tracking-wider mb-2 ml-4">Engines</h2>
-            <div class="bg-apple-card rounded-[24px] overflow-hidden border border-apple-border shadow-xl">
-                <div class="flex items-center p-4.5 border-b border-apple-border active:bg-apple-cardHover transition cursor-pointer px-5 py-4" onclick="AppRouter.nav('view-enhance')">
-                    <i class="ph-fill ph-magic-wand text-2xl text-apple-textDim w-10"></i>
+            <h2 class="text-[11px] font-bold text-apple-dim uppercase tracking-wider mb-2 ml-4">Architectural Tools</h2>
+            <div class="bg-apple-card rounded-[24px] overflow-hidden border border-apple-border">
+                <div class="flex items-center p-4.5 border-b border-apple-border active:bg-[#2C2C2E] transition cursor-pointer px-5 py-4" onclick="AppRouter.nav('view-enhance')">
+                    <i class="ph-fill ph-magic-wand text-2xl text-apple-dim w-10"></i>
                     <div class="flex-1">
                         <span class="block text-[17px] font-semibold text-white">Pro Image Processor</span>
-                        <span class="block text-xs text-apple-textDim mt-0.5">Upscale, Sharpen, Grade</span>
+                        <span class="block text-[12px] text-apple-dim mt-0.5">WebGL GLSL Shader Pipeline</span>
                     </div>
-                    <i class="ph ph-caret-right text-apple-textDim"></i>
+                    <i class="ph ph-caret-right text-apple-dim"></i>
                 </div>
-                <div class="flex items-center p-4.5 border-b border-apple-border active:bg-apple-cardHover transition cursor-pointer px-5 py-4" onclick="AppRouter.nav('view-downloader')">
-                    <i class="ph-fill ph-download-simple text-2xl text-apple-textDim w-10"></i>
+                <div class="flex items-center p-4.5 border-b border-apple-border active:bg-[#2C2C2E] transition cursor-pointer px-5 py-4" onclick="AppRouter.nav('view-downloader')">
+                    <i class="ph-fill ph-download-simple text-2xl text-apple-dim w-10"></i>
                     <div class="flex-1">
                         <span class="block text-[17px] font-semibold text-white">Media Downloader</span>
-                        <span class="block text-xs text-apple-textDim mt-0.5">Raw H.264 & WAV extraction</span>
+                        <span class="block text-[12px] text-apple-dim mt-0.5">Cobalt Raw Extraction Proxy</span>
                     </div>
-                    <i class="ph ph-caret-right text-apple-textDim"></i>
+                    <i class="ph ph-caret-right text-apple-dim"></i>
                 </div>
-                <div class="flex items-center p-4.5 active:bg-apple-cardHover transition cursor-pointer px-5 py-4" onclick="AppRouter.nav('view-transform')">
-                    <i class="ph-fill ph-file-pdf text-2xl text-apple-textDim w-10"></i>
+                <div class="flex items-center p-4.5 active:bg-[#2C2C2E] transition cursor-pointer px-5 py-4" onclick="AppRouter.nav('view-transform')">
+                    <i class="ph-fill ph-file-pdf text-2xl text-apple-dim w-10"></i>
                     <div class="flex-1">
-                        <span class="block text-[17px] font-semibold text-white">Doc Transform</span>
-                        <span class="block text-xs text-apple-textDim mt-0.5">Vectors & Packaging</span>
+                        <span class="block text-[17px] font-semibold text-white">Document Transform</span>
+                        <span class="block text-[12px] text-apple-dim mt-0.5">Vector Parse & Package</span>
                     </div>
-                    <i class="ph ph-caret-right text-apple-textDim"></i>
+                    <i class="ph ph-caret-right text-apple-dim"></i>
                 </div>
             </div>
         </div>
 
         <div>
-            <h2 class="text-[11px] font-bold text-apple-textDim uppercase tracking-wider mb-2 ml-4">System</h2>
-            <div class="bg-apple-card rounded-[24px] overflow-hidden border border-apple-border shadow-xl">
-                <div class="flex items-center p-4.5 active:bg-apple-cardHover transition cursor-pointer px-5 py-4" onclick="AppRouter.nav('view-storage')">
-                    <i class="ph-fill ph-hard-drives text-2xl text-apple-textDim w-10"></i>
-                    <span class="flex-1 text-[17px] font-semibold text-white">Storage & Cache</span>
-                    <span id="home-storage-val" class="text-apple-textDim text-[15px] mr-2">0 files</span>
-                    <i class="ph ph-caret-right text-apple-textDim"></i>
+            <h2 class="text-[11px] font-bold text-apple-dim uppercase tracking-wider mb-2 ml-4">System State</h2>
+            <div class="bg-apple-card rounded-[24px] overflow-hidden border border-apple-border">
+                <div class="flex items-center p-4.5 active:bg-[#2C2C2E] transition cursor-pointer px-5 py-4" onclick="AppRouter.nav('view-storage')">
+                    <i class="ph-fill ph-hard-drives text-2xl text-apple-dim w-10"></i>
+                    <span class="flex-1 text-[17px] font-semibold text-white">IndexedDB Storage</span>
+                    <span id="home-storage-val" class="text-apple-dim text-[15px] mr-2">0</span>
+                    <i class="ph ph-caret-right text-apple-dim"></i>
                 </div>
             </div>
         </div>
@@ -228,17 +189,17 @@
 </div>
 
 <!-- ==========================================
-     VIEW 2: PRO ENHANCEMENT ENGINE
+     VIEW: PRO ENHANCEMENT ENGINE (WebGL)
      ========================================== -->
-<div id="view-enhance" class="view-layer flex flex-col">
+<div id="view-enhance" class="view-layer">
     <header class="flex justify-between items-center px-4 py-2 mb-2 shrink-0">
-        <button onclick="AppRouter.back()" class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:bg-apple-cardHover transition"><i class="ph ph-caret-left text-xl"></i></button>
-        <h2 class="font-serif font-semibold text-lg text-white">Pro Processor</h2>
-        <button onclick="EnhanceEngine.exportMaster()" class="h-10 px-4 rounded-full bg-white text-black font-semibold text-[13px] active:scale-95 transition">Export</button>
+        <button onclick="AppRouter.back()" class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:opacity-70 transition"><i class="ph ph-caret-left text-xl"></i></button>
+        <h2 class="font-serif font-semibold text-lg text-white">WebGL Engine</h2>
+        <button onclick="WebGLEngine.export()" class="h-9 px-4 rounded-full bg-white text-black font-semibold text-[13px] active:scale-95 transition">Export</button>
     </header>
 
-    <div class="flex flex-col h-full">
-        <!-- Main Viewport -->
+    <div class="flex flex-col h-[calc(100vh-160px)]">
+        <!-- Viewport -->
         <div class="px-4 mb-4 shrink-0">
             <div class="bg-apple-card border border-apple-border rounded-[24px] overflow-hidden relative flex items-center justify-center min-h-[40vh] max-h-[45vh] shadow-2xl">
                 
@@ -246,89 +207,60 @@
                     <div class="w-16 h-16 rounded-full bg-apple-bg border border-apple-border flex items-center justify-center mb-3 shadow-lg">
                         <i class="ph-fill ph-image text-2xl text-white"></i>
                     </div>
-                    <span class="font-medium text-[15px]">Tap to Load Image</span>
-                    <span class="text-xs text-apple-textDim mt-1">High-Res Processing Enabled</span>
+                    <span class="font-medium text-[15px]">Load Raw Image</span>
+                    <span class="text-xs text-apple-dim mt-1">GPU Compute Active</span>
                     <input type="file" id="media-input" accept="image/*" class="hidden">
                 </label>
 
-                <!-- Processing Overlay -->
-                <div id="enhance-processing" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center hidden">
-                    <i class="ph ph-spinner-gap animate-spin text-4xl text-white mb-2"></i>
-                    <span class="text-sm font-medium text-white tracking-widest uppercase">Rendering Pixels</span>
-                </div>
-
-                <canvas id="enhance-canvas" class="max-w-full max-h-full object-contain hidden z-0"></canvas>
+                <!-- REAL WebGL Canvas -->
+                <canvas id="gl-canvas" class="max-w-full max-h-full object-contain hidden z-0"></canvas>
             </div>
         </div>
 
-        <!-- Pro Tools UI -->
-        <div id="pro-tools-container" class="flex-1 bg-apple-card border-t border-apple-border flex flex-col opacity-50 pointer-events-none transition-opacity duration-300 rounded-t-[32px]">
-            
-            <div class="flex justify-center pt-3 pb-1 shrink-0"><div class="w-12 h-1.5 bg-apple-border rounded-full"></div></div>
+        <!-- GPU Shading Controls -->
+        <div id="pro-tools-container" class="flex-1 bg-apple-card border-t border-apple-border flex flex-col opacity-50 pointer-events-none transition-opacity duration-300 rounded-t-[32px] pt-3">
+            <div class="flex justify-center pb-2 shrink-0"><div class="w-12 h-1.5 bg-apple-border rounded-full"></div></div>
 
-            <!-- Tool Categories -->
             <div class="tools-scroll shrink-0 border-b border-apple-border pb-3 mb-2">
-                <button class="tool-btn active" onclick="EnhanceEngine.switchTab('res')">Resolution</button>
-                <button class="tool-btn" onclick="EnhanceEngine.switchTab('light')">Light</button>
-                <button class="tool-btn" onclick="EnhanceEngine.switchTab('color')">Color</button>
-                <button class="tool-btn" onclick="EnhanceEngine.switchTab('detail')">Detail</button>
+                <button class="tool-btn active" onclick="WebGLEngine.switchTab('light')">Exposure</button>
+                <button class="tool-btn" onclick="WebGLEngine.switchTab('color')">Color Matrix</button>
+                <button class="tool-btn" onclick="WebGLEngine.switchTab('detail')">Convolution (Sharpen)</button>
             </div>
 
-            <!-- Tab: Resolution (Upscaling) -->
-            <div id="tab-res" class="px-6 py-2 flex-1 animate-fade-in">
-                <p class="text-[11px] font-bold text-apple-textDim uppercase tracking-wider mb-4">AI-Simulated Upscaling</p>
-                <div class="grid grid-cols-3 gap-3">
-                    <button onclick="EnhanceEngine.setUpscale(1)" id="btn-scale-1" class="scale-btn active py-4 rounded-2xl border border-apple-border bg-apple-bg flex flex-col items-center gap-1 active:scale-95 transition">
-                        <span class="font-bold text-white text-lg">1x</span><span class="text-[10px] text-apple-textDim">Original</span>
-                    </button>
-                    <button onclick="EnhanceEngine.setUpscale(2)" id="btn-scale-2" class="scale-btn py-4 rounded-2xl border border-apple-border bg-apple-bg flex flex-col items-center gap-1 active:scale-95 transition">
-                        <span class="font-bold text-white text-lg">2x</span><span class="text-[10px] text-apple-textDim">HD Enhance</span>
-                    </button>
-                    <button onclick="EnhanceEngine.setUpscale(4)" id="btn-scale-4" class="scale-btn py-4 rounded-2xl border border-apple-border bg-apple-bg flex flex-col items-center gap-1 active:scale-95 transition">
-                        <span class="font-bold text-white text-lg">4x</span><span class="text-[10px] text-apple-textDim">Ultra Res</span>
-                    </button>
+            <!-- Light Tab -->
+            <div id="tab-light" class="px-6 py-2 flex-1 animate-fade-in">
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2"><span class="text-[13px] font-semibold text-white">Exposure</span><span id="val-exposure" class="text-xs text-apple-dim">0</span></div>
+                    <input type="range" id="sl-exposure" min="-100" max="100" value="0" oninput="WebGLEngine.render()">
                 </div>
-                <p class="text-xs text-apple-textDim mt-4 text-center">Megapixel count is physically increased on export.</p>
-            </div>
-
-            <!-- Tab: Light -->
-            <div id="tab-light" class="px-6 py-2 flex-1 hidden">
-                <div class="mb-5">
-                    <div class="flex justify-between mb-2"><span class="text-sm font-medium">Exposure</span><span id="val-exposure" class="text-xs text-apple-textDim">0</span></div>
-                    <input type="range" id="sl-exposure" min="-100" max="100" value="0" oninput="EnhanceEngine.updatePreview()">
-                </div>
-                <div class="mb-5">
-                    <div class="flex justify-between mb-2"><span class="text-sm font-medium">Contrast</span><span id="val-contrast" class="text-xs text-apple-textDim">0</span></div>
-                    <input type="range" id="sl-contrast" min="-100" max="100" value="0" oninput="EnhanceEngine.updatePreview()">
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2"><span class="text-[13px] font-semibold text-white">Contrast</span><span id="val-contrast" class="text-xs text-apple-dim">0</span></div>
+                    <input type="range" id="sl-contrast" min="-100" max="100" value="0" oninput="WebGLEngine.render()">
                 </div>
             </div>
 
-            <!-- Tab: Color -->
+            <!-- Color Tab -->
             <div id="tab-color" class="px-6 py-2 flex-1 hidden">
-                <div class="mb-5">
-                    <div class="flex justify-between mb-2"><span class="text-sm font-medium">Temperature</span><span id="val-temp" class="text-xs text-apple-textDim">0</span></div>
-                    <input type="range" id="sl-temp" min="-100" max="100" value="0" oninput="EnhanceEngine.updatePreview()">
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2"><span class="text-[13px] font-semibold text-white">Saturation</span><span id="val-sat" class="text-xs text-apple-dim">0</span></div>
+                    <input type="range" id="sl-sat" min="-100" max="100" value="0" oninput="WebGLEngine.render()">
                 </div>
-                <div class="mb-5">
-                    <div class="flex justify-between mb-2"><span class="text-sm font-medium">Saturation</span><span id="val-sat" class="text-xs text-apple-textDim">0</span></div>
-                    <input type="range" id="sl-sat" min="-100" max="100" value="0" oninput="EnhanceEngine.updatePreview()">
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2"><span class="text-[13px] font-semibold text-white">Temperature</span><span id="val-temp" class="text-xs text-apple-dim">0</span></div>
+                    <input type="range" id="sl-temp" min="-100" max="100" value="0" oninput="WebGLEngine.render()">
                 </div>
-                <div class="mb-5">
-                    <div class="flex justify-between mb-2"><span class="text-sm font-medium">Vibrance</span><span id="val-vib" class="text-xs text-apple-textDim">0</span></div>
-                    <input type="range" id="sl-vib" min="-100" max="100" value="0" oninput="EnhanceEngine.updatePreview()">
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2"><span class="text-[13px] font-semibold text-white">Tint</span><span id="val-tint" class="text-xs text-apple-dim">0</span></div>
+                    <input type="range" id="sl-tint" min="-100" max="100" value="0" oninput="WebGLEngine.render()">
                 </div>
             </div>
 
-            <!-- Tab: Detail -->
+            <!-- Detail Tab (Unsharp Mask) -->
             <div id="tab-detail" class="px-6 py-2 flex-1 hidden">
-                <div class="mb-5">
-                    <div class="flex justify-between mb-2"><span class="text-sm font-medium text-apple-accent">Pro Sharpen</span><span id="val-sharp" class="text-xs text-apple-textDim">0</span></div>
-                    <input type="range" id="sl-sharp" min="0" max="100" value="0" oninput="EnhanceEngine.updatePreview()">
-                    <p class="text-[10px] text-apple-textDim mt-1">Applies unsharp mask matrix kernel on export.</p>
-                </div>
-                <div class="mb-5">
-                    <div class="flex justify-between mb-2"><span class="text-sm font-medium">Clarity</span><span id="val-clarity" class="text-xs text-apple-textDim">0</span></div>
-                    <input type="range" id="sl-clarity" min="0" max="100" value="0" oninput="EnhanceEngine.updatePreview()">
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2"><span class="text-[13px] font-semibold text-apple-accent">Unsharp Mask (Matrix)</span><span id="val-sharp" class="text-xs text-apple-dim">0</span></div>
+                    <input type="range" id="sl-sharp" min="0" max="100" value="0" oninput="WebGLEngine.render()">
+                    <p class="text-[11px] text-apple-dim mt-2 leading-relaxed">Applies a 3x3 spatial convolution matrix physically across the image buffer utilizing WebGL fragment shaders for zero-latency execution.</p>
                 </div>
             </div>
             
@@ -337,189 +269,265 @@
 </div>
 
 <!-- ==========================================
-     VIEW 3: DOWNLOADER & TRANSFORM & STORAGE
+     VIEW: MEDIA DOWNLOADER
      ========================================== -->
-<!-- (Keeping layout similar but fixing APIs) -->
-<div id="view-downloader" class="view-layer flex-col">
-    <header class="flex justify-between items-center px-4 py-2 mb-6 shrink-0">
-        <button onclick="AppRouter.back()" class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:bg-apple-cardHover transition"><i class="ph ph-caret-left text-xl"></i></button>
-        <h2 class="font-serif font-semibold text-lg text-white">Media Downloader</h2>
+<div id="view-downloader" class="view-layer">
+    <header class="flex justify-between items-center px-4 py-2 mb-6">
+        <button onclick="AppRouter.back()" class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:opacity-70 transition"><i class="ph ph-caret-left text-xl"></i></button>
+        <h2 class="font-serif font-semibold text-lg text-white">Proxy Extractor</h2>
         <div class="w-10"></div>
     </header>
     <div class="px-5">
         <div class="bg-apple-card p-6 rounded-[24px] border border-apple-border text-center mb-6 shadow-xl">
-            <input type="url" id="dl-url" placeholder="Paste social URL here..." class="w-full bg-apple-bg border border-apple-border rounded-xl py-4 px-4 text-[15px] text-white focus:outline-none focus:border-white transition mb-2">
-            <p class="text-[11px] text-apple-textDim">Extracts max quality directly from servers.</p>
+            <input type="url" id="dl-url" placeholder="Paste external link..." class="w-full bg-apple-bg border border-apple-border rounded-xl py-4 px-4 text-[15px] text-white focus:outline-none focus:border-white transition mb-3">
+            <p class="text-[11px] text-apple-dim leading-relaxed">Bypasses CORS restrictions via Cobalt API to execute direct binary extraction of H.264/WAV payloads.</p>
         </div>
-        <button id="btn-dl-video" onclick="Tools.download('video')" class="w-full bg-white text-black rounded-xl py-4 font-bold active:scale-[0.98] transition mb-3">Extract Video (MP4)</button>
-        <button id="btn-dl-audio" onclick="Tools.download('audio')" class="w-full bg-apple-card border border-apple-border text-white rounded-xl py-4 font-bold active:scale-[0.98] transition">Extract Audio (WAV)</button>
+        <button id="btn-dl-video" onclick="Tools.download('video')" class="w-full bg-white text-black rounded-xl py-4 font-bold active:scale-[0.98] transition mb-3">Extract MP4 Video</button>
+        <button id="btn-dl-audio" onclick="Tools.download('audio')" class="w-full bg-apple-card border border-apple-border text-white rounded-xl py-4 font-bold active:scale-[0.98] transition">Extract WAV Audio</button>
     </div>
 </div>
 
-<div id="view-transform" class="view-layer flex-col">
-    <header class="flex justify-between items-center px-4 py-2 mb-6 shrink-0">
-        <button onclick="AppRouter.back()" class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:bg-apple-cardHover transition"><i class="ph ph-caret-left text-xl"></i></button>
+<!-- ==========================================
+     VIEW: DOC TRANSFORM
+     ========================================== -->
+<div id="view-transform" class="view-layer">
+    <header class="flex justify-between items-center px-4 py-2 mb-6">
+        <button onclick="AppRouter.back()" class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:opacity-70 transition"><i class="ph ph-caret-left text-xl"></i></button>
         <h2 class="font-serif font-semibold text-lg text-white">Transform</h2>
         <div class="w-10"></div>
     </header>
     <div class="px-5 space-y-6">
         <div class="bg-apple-card p-5 rounded-[24px] border border-apple-border shadow-xl">
-            <h3 class="font-semibold mb-3">Image to PDF</h3>
-            <label class="block w-full border-2 border-dashed border-apple-border rounded-xl p-4 text-center cursor-pointer mb-3">
-                <span class="text-sm text-apple-textDim" id="lbl-img-pdf">Select Image File</span>
+            <h3 class="font-semibold text-[15px] mb-3">Raster to PDF Wrapper</h3>
+            <label class="block w-full border-2 border-dashed border-apple-border rounded-xl p-4 text-center cursor-pointer mb-3 active:bg-[#2C2C2E] transition">
+                <span class="text-sm text-apple-dim font-medium" id="lbl-img-pdf">Select Raster Image</span>
                 <input type="file" id="inp-img-pdf" accept="image/*" class="hidden" onchange="document.getElementById('lbl-img-pdf').innerText=this.files[0].name; document.getElementById('lbl-img-pdf').classList.add('text-apple-blue')">
             </label>
-            <button id="btn-img-pdf" onclick="Tools.imgToPdf()" class="w-full bg-white text-black rounded-xl py-3 font-bold active:scale-95 transition">Package</button>
+            <button id="btn-img-pdf" onclick="Tools.imgToPdf()" class="w-full bg-white text-black rounded-xl py-3 font-bold active:scale-95 transition">Package PDF</button>
         </div>
         <div class="bg-apple-card p-5 rounded-[24px] border border-apple-border shadow-xl">
-            <h3 class="font-semibold mb-3">PDF to Vector PNG</h3>
-            <label class="block w-full border-2 border-dashed border-apple-border rounded-xl p-4 text-center cursor-pointer mb-3">
-                <span class="text-sm text-apple-textDim" id="lbl-pdf-img">Select PDF Document</span>
+            <h3 class="font-semibold text-[15px] mb-3">Vector PDF to Raster PNG</h3>
+            <label class="block w-full border-2 border-dashed border-apple-border rounded-xl p-4 text-center cursor-pointer mb-3 active:bg-[#2C2C2E] transition">
+                <span class="text-sm text-apple-dim font-medium" id="lbl-pdf-img">Select Vector PDF</span>
                 <input type="file" id="inp-pdf-img" accept="application/pdf" class="hidden" onchange="document.getElementById('lbl-pdf-img').innerText=this.files[0].name; document.getElementById('lbl-pdf-img').classList.add('text-apple-blue')">
             </label>
-            <button id="btn-pdf-img" onclick="Tools.pdfToImg()" class="w-full bg-white text-black rounded-xl py-3 font-bold active:scale-95 transition">Extract</button>
+            <button id="btn-pdf-img" onclick="Tools.pdfToImg()" class="w-full bg-white text-black rounded-xl py-3 font-bold active:scale-95 transition">Extract Vector</button>
         </div>
     </div>
 </div>
 
-<div id="view-storage" class="view-layer flex-col">
-    <header class="flex justify-between items-center px-4 py-2 mb-6 shrink-0">
-        <button onclick="AppRouter.back()" class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:bg-apple-cardHover transition"><i class="ph ph-caret-left text-xl"></i></button>
-        <h2 class="font-serif font-semibold text-lg text-white">System</h2>
+<!-- ==========================================
+     VIEW: STORAGE (IndexedDB)
+     ========================================== -->
+<div id="view-storage" class="view-layer">
+    <header class="flex justify-between items-center px-4 py-2 mb-6">
+        <button onclick="AppRouter.back()" class="h-10 w-10 rounded-full bg-apple-card flex items-center justify-center active:opacity-70 transition"><i class="ph ph-caret-left text-xl"></i></button>
+        <h2 class="font-serif font-semibold text-lg text-white">IndexedDB State</h2>
         <div class="w-10"></div>
     </header>
     <div class="px-5">
+        <p class="text-[11px] text-apple-dim uppercase tracking-wider font-bold mb-2 ml-2">Asynchronous Database Metrics</p>
         <div class="bg-apple-card rounded-[24px] mb-6 overflow-hidden border border-apple-border">
-            <div class="flex justify-between p-4 border-b border-apple-border"><span class="font-medium">Videos Processed</span><span id="st-v">0</span></div>
-            <div class="flex justify-between p-4 border-b border-apple-border"><span class="font-medium">Audio Processed</span><span id="st-a">0</span></div>
-            <div class="flex justify-between p-4"><span class="font-medium">Images Processed</span><span id="st-i">0</span></div>
+            <div class="flex justify-between p-4.5 border-b border-apple-border"><span class="font-medium text-[15px]">Videos Processed</span><span id="st-v" class="text-apple-dim">0</span></div>
+            <div class="flex justify-between p-4.5 border-b border-apple-border"><span class="font-medium text-[15px]">Audio Processed</span><span id="st-a" class="text-apple-dim">0</span></div>
+            <div class="flex justify-between p-4.5"><span class="font-medium text-[15px]">Images Processed</span><span id="st-i" class="text-apple-dim">0</span></div>
         </div>
-        <button onclick="Tools.wipe()" class="w-full bg-apple-card border border-red-500/30 text-red-500 rounded-xl py-4 font-bold active:scale-95 transition">Wipe Cache</button>
+        <button onclick="DB.wipe()" class="w-full bg-apple-card border border-red-500/30 text-red-500 rounded-xl py-4 font-bold active:scale-95 transition">Purge Database</button>
     </div>
 </div>
 
-
 <!-- Floating Action Bar -->
 <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex gap-2">
-    <div class="bg-apple-card/90 backdrop-blur-xl border border-apple-border rounded-full flex items-center px-2 py-2 gap-2 shadow-2xl">
-        <button onclick="AppRouter.nav('view-home')" class="h-10 w-10 rounded-full bg-apple-bg flex items-center justify-center active:scale-95 transition text-white border border-apple-border"><i class="ph-fill ph-house text-xl"></i></button>
-        <button class="h-10 w-10 rounded-full flex items-center justify-center text-apple-textDim"><i class="ph-fill ph-microphone text-xl"></i></button>
+    <div class="bg-apple-card/90 backdrop-blur-xl border border-apple-border rounded-full flex items-center px-2 py-2 gap-2 shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+        <button onclick="AppRouter.nav('view-home')" class="h-11 w-11 rounded-full bg-[#3A3A3C] flex items-center justify-center active:scale-95 transition text-white border border-apple-border shadow-inner"><i class="ph-fill ph-house text-xl"></i></button>
+        <button class="h-11 w-11 rounded-full flex items-center justify-center text-apple-dim"><i class="ph-fill ph-microphone text-xl"></i></button>
     </div>
 </div>
 
 <script>
     /* ==========================================
-       1. BULLETPROOF ROUTER (No History API)
+       1. ROUTER (DOM Manpulation, No Overlap)
        ========================================== */
     const AppRouter = {
         stack: ['view-home'],
         nav: function(id) {
-            UI.vibrate(10);
-            const current = document.getElementById(this.stack[this.stack.length-1]);
-            const next = document.getElementById(id);
-            
-            // Clean slide transitions
-            current.classList.remove('active');
-            setTimeout(() => {
-                next.classList.add('active');
-                this.stack.push(id);
-            }, 50);
+            UI.vib(10);
+            document.querySelectorAll('.view-layer').forEach(v => v.classList.remove('active', 'animate-slide-in'));
+            const target = document.getElementById(id);
+            target.classList.add('active', 'animate-slide-in');
+            this.stack.push(id);
         },
         back: function() {
             if(this.stack.length <= 1) return;
-            UI.vibrate(10);
+            UI.vib(10);
+            this.stack.pop();
+            const prevId = this.stack[this.stack.length-1];
+            document.querySelectorAll('.view-layer').forEach(v => v.classList.remove('active', 'animate-slide-in'));
+            document.getElementById(prevId).classList.add('active', 'animate-slide-in');
+        }
+    };
+
+    const UI = {
+        vib: (ms) => { if(navigator.vibrate) navigator.vibrate(ms); },
+        toast: (msg, type='info') => {
+            UI.vib(type==='error'?[50,50]:50);
+            const box = document.createElement('div');
+            let icon = type==='error' ? '<i class="ph-fill ph-warning-circle text-red-500 text-lg"></i>' : '<i class="ph-fill ph-check-circle text-green-500 text-lg"></i>';
+            box.className = `flex items-center gap-3 px-5 py-3.5 rounded-full bg-[#1C1C1E]/95 border border-[#2C2C2E] text-[14px] font-semibold shadow-2xl transition-all duration-300 opacity-0 translate-y-[-20px] backdrop-blur-xl`;
+            box.innerHTML = `${icon} <span class="text-white">${msg}</span>`;
+            document.getElementById('toast-container').appendChild(box);
             
-            const current = document.getElementById(this.stack.pop());
-            const prev = document.getElementById(this.stack[this.stack.length-1]);
-            
-            current.classList.remove('active');
-            setTimeout(() => prev.classList.add('active'), 50);
+            requestAnimationFrame(() => { box.style.opacity = '1'; box.style.transform = 'translateY(0)'; });
+            setTimeout(() => { box.style.opacity = '0'; box.style.transform = 'scale(0.9)'; setTimeout(()=>box.remove(), 300); }, 3000);
+        },
+        btn: (id, load, txt) => {
+            const b = document.getElementById(id);
+            b.disabled = load; b.innerHTML = load ? `<i class="ph ph-spinner animate-spin text-xl"></i>` : txt;
+            b.style.opacity = load ? '0.5' : '1';
         }
     };
 
     /* ==========================================
-       2. UI & STORAGE SYSTEM
+       2. INDEXED DB ASYNC STORAGE (Architecture Upgrade)
        ========================================== */
-    const UI = {
-        vibrate: (ms) => { if(navigator.vibrate) navigator.vibrate(ms); },
-        toast: (msg, type='info') => {
-            UI.vibrate(type==='error'?[50,50]:50);
-            const box = document.createElement('div');
-            let icon = type==='error' ? '<i class="ph-fill ph-warning-circle text-red-500"></i>' : '<i class="ph-fill ph-check-circle text-green-500"></i>';
-            box.className = `flex items-center gap-3 px-5 py-3 rounded-full bg-apple-card border border-apple-border text-sm font-medium shadow-2xl transition-all duration-300 opacity-0 translate-y-[-20px]`;
-            box.innerHTML = `${icon} <span>${msg}</span>`;
-            document.getElementById('toast-container').appendChild(box);
-            
-            requestAnimationFrame(() => { box.style.opacity = '1'; box.style.transform = 'translateY(0)'; });
-            setTimeout(() => { box.style.opacity = '0'; setTimeout(()=>box.remove(), 300); }, 3000);
-        },
-        btn: (id, loading, text) => {
-            const b = document.getElementById(id);
-            b.disabled = loading;
-            b.innerHTML = loading ? `<i class="ph ph-spinner animate-spin"></i>` : text;
-            b.style.opacity = loading ? '0.5' : '1';
-        }
-    };
-
-    const Storage = {
+    const DB = {
+        db: null,
         init: () => {
-            ['v','a','i'].forEach(k => { if(!localStorage.getItem('n_'+k)) localStorage.setItem('n_'+k, '0'); });
-            Storage.update();
+            const req = indexedDB.open("NaviOS_DB", 1);
+            req.onupgradeneeded = e => {
+                const db = e.target.result;
+                if(!db.objectStoreNames.contains("metrics")) db.createObjectStore("metrics", { keyPath: "id" });
+            };
+            req.onsuccess = e => {
+                DB.db = e.target.result;
+                DB.readAll();
+            };
         },
-        inc: (k) => {
-            localStorage.setItem('n_'+k, parseInt(localStorage.getItem('n_'+k))+1);
-            Storage.update();
+        inc: (id) => {
+            if(!DB.db) return;
+            const tx = DB.db.transaction("metrics", "readwrite");
+            const store = tx.objectStore("metrics");
+            store.get(id).onsuccess = e => {
+                let val = e.target.result ? e.target.result.val + 1 : 1;
+                store.put({ id: id, val: val });
+                DB.readAll();
+            };
         },
-        update: () => {
-            const v = parseInt(localStorage.getItem('n_v')), a = parseInt(localStorage.getItem('n_a')), i = parseInt(localStorage.getItem('n_i'));
-            if(document.getElementById('st-v')) {
-                document.getElementById('st-v').innerText = v;
-                document.getElementById('st-a').innerText = a;
-                document.getElementById('st-i').innerText = i;
-                document.getElementById('home-storage-val').innerText = (v+a+i) + ' files';
+        readAll: () => {
+            if(!DB.db) return;
+            const tx = DB.db.transaction("metrics", "readonly");
+            const store = tx.objectStore("metrics");
+            let total = 0;
+            store.getAll().onsuccess = e => {
+                const data = e.target.result;
+                let v=0, a=0, i=0;
+                data.forEach(d => {
+                    if(d.id==='video') v = d.val;
+                    if(d.id==='audio') a = d.val;
+                    if(d.id==='image') i = d.val;
+                });
+                if(document.getElementById('st-v')) {
+                    document.getElementById('st-v').innerText = v;
+                    document.getElementById('st-a').innerText = a;
+                    document.getElementById('st-i').innerText = i;
+                    document.getElementById('home-storage-val').innerText = (v+a+i);
+                }
+            };
+        },
+        wipe: () => {
+            if(confirm("Purge IndexedDB?")) {
+                const tx = DB.db.transaction("metrics", "readwrite");
+                tx.objectStore("metrics").clear();
+                tx.oncomplete = () => { DB.readAll(); UI.toast('Database Purged', 'success'); AppRouter.back(); };
             }
         }
     };
 
     /* ==========================================
-       3. PRO IMAGE PROCESSOR (The Big Upgrade)
+       3. WebGL 2.0 FRAGMENT SHADER ENGINE (50x Upgrade)
        ========================================== */
-    const EnhanceEngine = {
-        canvas: document.getElementById('enhance-canvas'),
-        ctx: document.getElementById('enhance-canvas').getContext('2d', {willReadFrequently: true}),
-        img: new Image(),
-        loaded: false,
-        upscaleFactor: 1,
+    const WebGLEngine = {
+        canvas: document.getElementById('gl-canvas'),
+        gl: null, program: null, texture: null,
+        img: new Image(), loaded: false,
         
+        // Shader Source Codes
+        vsSource: `#version 300 es
+            in vec2 a_position;
+            in vec2 a_texCoord;
+            out vec2 v_texCoord;
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+                v_texCoord = a_texCoord;
+            }`,
+            
+        fsSource: `#version 300 es
+            precision highp float;
+            in vec2 v_texCoord;
+            uniform sampler2D u_image;
+            uniform vec2 u_resolution;
+            
+            // Uniforms from Sliders
+            uniform float u_exposure;
+            uniform float u_contrast;
+            uniform float u_saturation;
+            uniform float u_temperature;
+            uniform float u_tint;
+            uniform float u_sharpness;
+            
+            out vec4 outColor;
+
+            // Matrix for RGB to YIQ (for Saturation)
+            const mat3 rgb2yiq = mat3(0.299, 0.587, 0.114, 0.596, -0.274, -0.322, 0.211, -0.523, 0.312);
+            const mat3 yiq2rgb = mat3(1.0, 0.956, 0.621, 1.0, -0.272, -0.647, 1.0, -1.106, 1.703);
+
+            void main() {
+                // 1. Convolution (Unsharp Mask)
+                vec3 color = vec3(0.0);
+                if (u_sharpness > 0.0) {
+                    vec2 onePixel = vec2(1.0, 1.0) / u_resolution;
+                    float amount = u_sharpness * 2.0; 
+                    
+                    // 3x3 Kernel (Center heavily weighted, edges subtracted)
+                    vec3 center = texture(u_image, v_texCoord).rgb;
+                    vec3 up     = texture(u_image, v_texCoord + vec2(0.0, -onePixel.y)).rgb;
+                    vec3 down   = texture(u_image, v_texCoord + vec2(0.0, onePixel.y)).rgb;
+                    vec3 left   = texture(u_image, v_texCoord + vec2(-onePixel.x, 0.0)).rgb;
+                    vec3 right  = texture(u_image, v_texCoord + vec2(onePixel.x, 0.0)).rgb;
+                    
+                    color = center * (1.0 + 4.0 * amount) - (up + down + left + right) * amount;
+                } else {
+                    color = texture(u_image, v_texCoord).rgb;
+                }
+
+                // 2. Exposure & Contrast
+                color = color * pow(2.0, u_exposure);
+                color = (color - 0.5) * max(u_contrast + 1.0, 0.0) + 0.5;
+
+                // 3. Saturation
+                vec3 yColor = rgb2yiq * color;
+                float originalY = yColor.r;
+                yColor.g *= (1.0 + u_saturation);
+                yColor.b *= (1.0 + u_saturation);
+                color = yiq2rgb * yColor;
+
+                // 4. Temperature (Warm/Cool) & Tint (Green/Magenta)
+                color.r += u_temperature;
+                color.b -= u_temperature;
+                color.g += u_tint;
+
+                outColor = vec4(clamp(color, 0.0, 1.0), 1.0);
+            }`,
+
         init: function() {
             document.getElementById('media-input').addEventListener('change', e => this.loadFile(e));
-        },
-        
-        switchTab: function(tab) {
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active', 'bg-white', 'text-black'));
-            event.target.classList.add('active', 'bg-white', 'text-black');
-            
-            ['res', 'light', 'color', 'detail'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.add('hidden');
-            });
-            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            this.gl = this.canvas.getContext('webgl2', { preserveDrawingBuffer: true });
+            if (!this.gl) return console.error("WebGL 2 not supported");
         },
 
-        setUpscale: function(factor) {
-            this.upscaleFactor = factor;
-            document.querySelectorAll('.scale-btn').forEach(b => {
-                b.classList.remove('border-apple-blue', 'bg-apple-blue/20');
-                b.classList.add('border-apple-border', 'bg-apple-bg');
-            });
-            event.currentTarget.classList.remove('border-apple-border', 'bg-apple-bg');
-            event.currentTarget.classList.add('border-apple-blue', 'bg-apple-blue/20');
-            UI.vibrate(10);
-        },
-        
         loadFile: function(e) {
             const file = e.target.files[0];
             if(!file) return;
-            
             document.getElementById('enhance-upload-ui').classList.add('hidden');
             this.canvas.classList.remove('hidden');
             document.getElementById('pro-tools-container').classList.remove('opacity-50', 'pointer-events-none');
@@ -527,153 +535,97 @@
             const url = URL.createObjectURL(file);
             this.img.onload = () => {
                 this.loaded = true;
-                this.updatePreview(); // Initial draw
+                this.canvas.width = this.img.naturalWidth;
+                this.canvas.height = this.img.naturalHeight;
+                this.setupGL();
+                this.render();
             };
             this.img.src = url;
         },
 
-        // Helper to grab slider values
+        compileShader: function(type, source) {
+            const s = this.gl.createShader(type);
+            this.gl.shaderSource(s, source);
+            this.gl.compileShader(s);
+            if (!this.gl.getShaderParameter(s, this.gl.COMPILE_STATUS)) console.error(this.gl.getShaderInfoLog(s));
+            return s;
+        },
+
+        setupGL: function() {
+            const gl = this.gl;
+            const vs = this.compileShader(gl.VERTEX_SHADER, this.vsSource);
+            const fs = this.compileShader(gl.FRAGMENT_SHADER, this.fsSource);
+            
+            this.program = gl.createProgram();
+            gl.attachShader(this.program, vs); gl.attachShader(this.program, fs);
+            gl.linkProgram(this.program);
+            gl.useProgram(this.program);
+
+            // Setup Geometry (Full Canvas Quad)
+            const posBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ -1,-1,  1,-1,  -1,1,  -1,1,  1,-1,  1,1 ]), gl.STATIC_DRAW);
+            const posLoc = gl.getAttribLocation(this.program, "a_position");
+            gl.enableVertexAttribArray(posLoc);
+            gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+            const texCoordBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ 0,1,  1,1,  0,0,  0,0,  1,1,  1,0 ]), gl.STATIC_DRAW);
+            const texLoc = gl.getAttribLocation(this.program, "a_texCoord");
+            gl.enableVertexAttribArray(texLoc);
+            gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, 0, 0);
+
+            // Upload Texture to GPU Memory
+            this.texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, this.texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        },
+
         val: function(id) {
-            const v = parseInt(document.getElementById('sl-'+id).value);
+            const v = document.getElementById('sl-'+id).value;
             document.getElementById('val-'+id).innerText = v;
-            return v;
+            return parseFloat(v) / 100.0; // Normalize -1.0 to 1.0
         },
 
-        // Real-time Preview Engine (Fast)
-        updatePreview: function() {
-            if(!this.loaded) return;
-            
-            // Preview is bound to native resolution for speed
-            this.canvas.width = this.img.naturalWidth;
-            this.canvas.height = this.img.naturalHeight;
-            
-            // Get slider values
-            const exp = this.val('exposure'); // -100 to 100
-            const con = this.val('contrast');
-            const sat = this.val('sat');
-            const sharp = this.val('sharp');
-            const clarity = this.val('clarity');
-            // Advanced colors mapped to CSS filters for preview speed
-            const b = 100 + exp; 
-            const c = 100 + con;
-            const s = 100 + sat;
-            
-            // Apply standard CSS filters for instant preview
-            this.ctx.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%)`;
-            this.ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height);
-            this.ctx.filter = 'none';
+        render: function() {
+            if(!this.loaded || !this.gl) return;
+            const gl = this.gl;
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-            // Temp/Tint Preview Hack (Overlay Blending)
-            const temp = this.val('temp');
-            if(temp !== 0) {
-                this.ctx.globalCompositeOperation = temp > 0 ? 'color-burn' : 'color-dodge';
-                this.ctx.fillStyle = temp > 0 ? `rgba(255, 150, 0, ${temp/400})` : `rgba(0, 150, 255, ${Math.abs(temp)/400})`;
-                this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
-                this.ctx.globalCompositeOperation = 'source-over';
-            }
+            // Inject Uniforms from DOM
+            gl.uniform2f(gl.getUniformLocation(this.program, "u_resolution"), gl.canvas.width, gl.canvas.height);
+            gl.uniform1f(gl.getUniformLocation(this.program, "u_exposure"), this.val('exposure') * 2.0); // -2 to 2 stops
+            gl.uniform1f(gl.getUniformLocation(this.program, "u_contrast"), this.val('contrast'));
+            gl.uniform1f(gl.getUniformLocation(this.program, "u_saturation"), this.val('sat'));
+            gl.uniform1f(gl.getUniformLocation(this.program, "u_temperature"), this.val('temp') * 0.5);
+            gl.uniform1f(gl.getUniformLocation(this.program, "u_tint"), this.val('tint') * 0.5);
+            gl.uniform1f(gl.getUniformLocation(this.program, "u_sharpness"), Math.max(0, this.val('sharp'))); // 0 to 1
+
+            // Execute Shader Pipeline
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
         },
 
-        // Export Engine (Heavy Algorithmic Processing)
-        exportMaster: function() {
+        export: function() {
             if(!this.loaded) return UI.toast('Load an image first', 'error');
+            // Since preserveDrawingBuffer=true, we can directly export the WebGL context
+            const url = this.canvas.toDataURL('image/jpeg', 1.0);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'NaviOS_WebGL_Master.jpg'; a.target = '_blank';
+            document.body.appendChild(a); a.click(); a.remove();
             
-            document.getElementById('enhance-processing').classList.remove('hidden');
-            
-            // Allow UI to update before freezing main thread
-            setTimeout(() => {
-                this._processAndExport();
-            }, 100);
+            DB.inc('image');
+            UI.toast('Master Exported', 'success');
         },
 
-        _processAndExport: function() {
-            // 1. Setup Master Canvas with Upscaling
-            const masterCanvas = document.createElement('canvas');
-            const mCtx = masterCanvas.getContext('2d', {willReadFrequently: true});
-            
-            masterCanvas.width = this.img.naturalWidth * this.upscaleFactor;
-            masterCanvas.height = this.img.naturalHeight * this.upscaleFactor;
-            
-            // High-quality bicubic interpolation built into browser
-            mCtx.imageSmoothingEnabled = true;
-            mCtx.imageSmoothingQuality = 'high';
-
-            // 2. Base Draw with Filters
-            const exp = parseInt(document.getElementById('sl-exposure').value);
-            const con = parseInt(document.getElementById('sl-contrast').value);
-            const sat = parseInt(document.getElementById('sl-sat').value);
-            mCtx.filter = `brightness(${100+exp}%) contrast(${100+con}%) saturate(${100+sat}%)`;
-            mCtx.drawImage(this.img, 0, 0, masterCanvas.width, masterCanvas.height);
-            mCtx.filter = 'none';
-
-            // 3. Pro Sharpening Matrix (Convolution)
-            const sharpVal = parseInt(document.getElementById('sl-sharp').value);
-            if(sharpVal > 0) {
-                const imgData = mCtx.getImageData(0,0, masterCanvas.width, masterCanvas.height);
-                const data = imgData.data;
-                const w = masterCanvas.width;
-                const h = masterCanvas.height;
-                
-                // Simple Unsharp Mask approximation kernel
-                const mix = sharpVal / 100;
-                const kernel = [
-                    0, -1, 0,
-                    -1, 5, -1,
-                    0, -1, 0
-                ];
-                
-                // We create a temporary array for output (very heavy operation)
-                const out = new Uint8ClampedArray(data.length);
-                
-                // Simplified convolution loop for center pixels
-                for(let y=1; y<h-1; y++) {
-                    for(let x=1; x<w-1; x++) {
-                        const px = (y*w + x) * 4;
-                        let r=0, g=0, b=0;
-                        
-                        // Apply 3x3 kernel
-                        for(let cy=-1; cy<=1; cy++) {
-                            for(let cx=-1; cx<=1; cx++) {
-                                const cpx = ((y+cy)*w + (x+cx)) * 4;
-                                const k = kernel[(cy+1)*3 + (cx+1)];
-                                r += data[cpx] * k;
-                                g += data[cpx+1] * k;
-                                b += data[cpx+2] * k;
-                            }
-                        }
-                        
-                        // Blend sharpened with original based on intensity
-                        out[px] = (r * mix) + (data[px] * (1-mix));
-                        out[px+1] = (g * mix) + (data[px+1] * (1-mix));
-                        out[px+2] = (b * mix) + (data[px+2] * (1-mix));
-                        out[px+3] = data[px+3]; // Alpha
-                    }
-                }
-                
-                // Copy back edges (unsharpened to save complex edge logic)
-                for(let i=0; i<data.length; i+=4) {
-                    if(out[i+3] === 0) { // If alpha is 0, it wasn't processed (edge)
-                        out[i] = data[i]; out[i+1] = data[i+1]; out[i+2] = data[i+2]; out[i+3] = data[i+3];
-                    }
-                }
-                
-                mCtx.putImageData(new ImageData(out, w, h), 0, 0);
-            }
-
-            // 4. Extract and Download
-            const dataUrl = masterCanvas.toDataURL('image/jpeg', 0.95);
-            
-            // Safe Download Method for iframe/preview environments
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = `NaviOS_ProMaster_${this.upscaleFactor}x.jpg`;
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            Storage.inc('i');
-            document.getElementById('enhance-processing').classList.add('hidden');
-            UI.toast('Master Exported', 'success');
+        switchTab: function(tab) {
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            ['light', 'color', 'detail'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
         }
     };
 
@@ -690,24 +642,22 @@
             UI.btn(btn, true, '');
             
             try {
-                // Formatting specifically for Cobalt to avoid CORS block
                 const res = await fetch('https://api.cobalt.tools/api/json', {
                     method: 'POST',
                     headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: url, videoQuality: 'max', isAudioOnly: type === 'audio' })
                 });
 
-                if(!res.ok) throw new Error('API Blocked. Use standalone browser.');
+                if(!res.ok) throw new Error('API Rate Limit. Try again.');
                 const data = await res.json();
                 
                 if(data.url) {
-                    // Safe iframe download
                     const a = document.createElement('a');
                     a.href = data.url; a.target = '_blank';
                     document.body.appendChild(a); a.click(); a.remove();
-                    Storage.inc(type === 'video' ? 'v' : 'a');
-                    UI.toast('Extracting...', 'success');
-                } else throw new Error(data.text || 'Error');
+                    DB.inc(type === 'video' ? 'video' : 'audio');
+                    UI.toast('Payload Extracted', 'success');
+                } else throw new Error(data.text || 'Extraction failed');
             } catch (e) {
                 UI.toast(e.message, 'error');
             } finally { UI.btn(btn, false, og); }
@@ -719,21 +669,21 @@
             const og = document.getElementById('btn-img-pdf').innerHTML;
             UI.btn('btn-img-pdf', true, '');
             
-            const reader = new FileReader();
-            reader.onload = e => {
+            const r = new FileReader();
+            r.onload = e => {
                 const img = new Image();
                 img.onload = () => {
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF({ orientation: img.width>img.height?'l':'p', unit:'px', format:[img.width, img.height] });
                     doc.addImage(img, 'JPEG', 0, 0, img.width, img.height);
                     doc.save('NaviOS_Doc.pdf');
-                    Storage.inc('i');
-                    UI.toast('PDF Saved', 'success');
+                    DB.inc('image');
+                    UI.toast('PDF Packaged', 'success');
                     UI.btn('btn-img-pdf', false, og);
                 };
                 img.src = e.target.result;
             };
-            reader.readAsDataURL(file);
+            r.readAsDataURL(file);
         },
 
         pdfToImg: () => {
@@ -742,8 +692,8 @@
             const og = document.getElementById('btn-pdf-img').innerHTML;
             UI.btn('btn-pdf-img', true, '');
             
-            const reader = new FileReader();
-            reader.onload = async function() {
+            const r = new FileReader();
+            r.onload = async function() {
                 try {
                     const pdfjsLib = window['pdfjs-dist/build/pdf'];
                     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -751,7 +701,7 @@
                     const page = await pdf.getPage(1);
                     
                     const canvas = document.createElement('canvas');
-                    const viewport = page.getViewport({ scale: 3.0 }); // High-def extraction
+                    const viewport = page.getViewport({ scale: 3.0 });
                     canvas.height = viewport.height; canvas.width = viewport.width;
                     
                     await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
@@ -760,25 +710,18 @@
                     a.href = canvas.toDataURL('image/png'); a.download = 'NaviOS_Vector.png';
                     document.body.appendChild(a); a.click(); a.remove();
                     
-                    Storage.inc('i');
+                    DB.inc('image');
                     UI.toast('PNG Extracted', 'success');
                 } catch(e) { UI.toast('PDF Error', 'error'); }
                 finally { UI.btn('btn-pdf-img', false, og); }
             };
-            reader.readAsArrayBuffer(file);
-        },
-
-        wipe: () => {
-            if(confirm("Erase all metrics?")) { localStorage.clear(); Storage.init(); UI.toast('Wiped', 'success'); AppRouter.back(); }
+            r.readAsArrayBuffer(file);
         }
     };
 
-    /* ==========================================
-       INIT
-       ========================================== */
     window.onload = () => {
-        Storage.init();
-        EnhanceEngine.init();
+        DB.init();
+        WebGLEngine.init();
     };
 </script>
 </body>
